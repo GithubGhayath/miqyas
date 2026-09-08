@@ -1,0 +1,163 @@
+{
+  "nav": {
+    "services": "خدماتنا",
+    "method": "منهجيتنا",
+    "work": "أعمالنا",
+    "notes": "ملاحظات ميدانية",
+    "about": "من نحن",
+    "contact": "تواصل معنا",
+    "skipToContent": "الانتقال إلى المحتوى",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة"
+  },
+  "theme": {
+    "light": "الوضع الفاتح",
+    "dark": "الوضع الداكن",
+    "toggle": "تبديل السمة"
+  },
+  "locale": {
+    "switch": "English",
+    "label": "اللغة"
+  },
+  "home": {
+    "heroPrimary": "اطلب تقييمًا أوليًا",
+    "heroSecondary": "كيف نعمل",
+    "factsVisit": "الزيارة الميدانية",
+    "factsDelivery": "التسليم",
+    "factsReceive": "تستلم",
+    "factsReceiveValue": "تقرير + رسم CAD + جدول حالة",
+    "problemHeading": "المشكلة، ببساطة",
+    "scaleHeading": "سلّم الحالة",
+    "servicesHeading": "خدماتنا",
+    "servicesLink": "عرض جميع الخدمات",
+    "workHeading": "آخر عمل",
+    "workLink": "عرض كل الأعمال",
+    "notesHeading": "ملاحظات ميدانية",
+    "notesLink": "عرض جميع الملاحظات",
+    "closingHeading": "جاهز للبدء؟",
+    "closingBody": "أرسل تفاصيل المنشأة، ونعاود التواصل خلال يومي عمل."
+  },
+  "services": {
+    "title": "خدماتنا",
+    "intro": "أربع خدمات، بحسب ما تحتاج إليه: منشأة كاملة، خط إنتاج واحد، آلة مفردة، أو حضور ميداني متكرر.",
+    "whatItIs": "ما هي",
+    "whoAsks": "لمن هذه الخدمة",
+    "youReceive": "ماذا تستلم",
+    "duration": "المدة المتوقعة",
+    "exclusionsHeading": "خارج نطاق العمل",
+    "exclusionsBody": "لا نجري اختبارات مخبرية، ولا اختبارات إتلافية، ولا تحققًا قانونيًا من الملكية، ولا تقييمًا بيئيًا."
+  },
+  "method": {
+    "title": "منهجيتنا",
+    "phasesHeading": "المراحل الخمس",
+    "clientRole": "دور العميل",
+    "deliverables": "المخرجات",
+    "duration": "المدة",
+    "days": "أيام",
+    "importance": {
+      "critical": "حرج",
+      "core": "أساسي",
+      "supporting": "مساند"
+    },
+    "tiersHeading": "تقييم أولي مقابل تقييم كامل",
+    "tierPreliminary": "أولي",
+    "tierFull": "كامل",
+    "referencesHeading": "مرجعيات المنهجية",
+    "referencesBody": "هيكلية تقاريرنا تتبع معيار ASTM E2018، ومعايير CEMA وDIN 22101 حيثما دخلت النواقل ضمن النطاق."
+  },
+  "work": {
+    "title": "أعمالنا",
+    "pilotLabel": "مشروع تجريبي، وثائقي بلا مقابل",
+    "deliveredLabel": "مشروع منجز",
+    "equipmentHeading": "سجل المعدات",
+    "findingsHeading": "النتائج",
+    "decisionHeading": "القرار الذي أتاحه التقييم",
+    "briefHeading": "الموجز",
+    "sector": "القطاع",
+    "governorate": "المحافظة",
+    "year": "السنة"
+  },
+  "notes": {
+    "title": "ملاحظات ميدانية",
+    "readingTime": "دقائق قراءة",
+    "publishedOn": "نُشر في"
+  },
+  "about": {
+    "title": "من نحن",
+    "teamHeading": "الفريق",
+    "unknownHeading": "كيف نتعامل مع ما لا نعرفه",
+    "unknownBody": "تُراجَع التقارير الأولى من قبل مهندس أول مستقل قبل التسليم، وتُكتب حدود النطاق في الصفحة الأولى من كل تقرير.",
+    "faqHeading": "الأسئلة الشائعة"
+  },
+  "contact": {
+    "title": "تواصل معنا",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "organisation": "الجهة (اختياري)",
+    "country": "البلد (اختياري)",
+    "facilityLocation": "موقع المنشأة (اختياري)",
+    "facilityType": "نوع المنشأة",
+    "facilityTypeOptions": {
+      "factory": "مصنع",
+      "line": "خط إنتاج",
+      "warehouse": "مستودع",
+      "machine": "آلة مفردة",
+      "other": "أخرى"
+    },
+    "message": "رسالتك",
+    "preferredContact": "طريقة التواصل المفضلة",
+    "preferredContactOptions": {
+      "email": "البريد الإلكتروني",
+      "whatsapp": "واتساب",
+      "call": "اتصال هاتفي"
+    },
+    "submit": "أرسل الطلب",
+    "submitting": "جارٍ الإرسال…",
+    "factsResponseTime": "زمن الاستجابة المتوقع",
+    "factsHours": "خلال {hours} ساعة",
+    "factsWorkingHours": "ساعات العمل",
+    "factsLanguages": "اللغات",
+    "factsPaymentNote": "يمكن استلام الدفع عبر ممثل خارج سوريا.",
+    "successHeading": "تم استلام طلبك",
+    "successBody": "الرقم المرجعي: {reference}. سنعاود التواصل معك خلال {hours} ساعة.",
+    "errorHeading": "تعذّر إرسال الطلب",
+    "errorBody": "حدث خطأ في الشبكة. البيانات التي أدخلتها محفوظة، يمكنك إعادة المحاولة.",
+    "retry": "إعادة المحاولة",
+    "errorSummaryHeading": "يرجى تصحيح ما يلي",
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "صيغة البريد الإلكتروني غير صحيحة",
+      "messageRequired": "الرسالة مطلوبة",
+      "messageMin": "الرسالة يجب أن تكون 20 حرفًا على الأقل",
+      "facilityTypeRequired": "يرجى اختيار نوع المنشأة",
+      "preferredContactRequired": "يرجى اختيار طريقة التواصل"
+    }
+  },
+  "footer": {
+    "rights": "جميع الحقوق محفوظة",
+    "location": "الموقع",
+    "email": "البريد الإلكتروني"
+  },
+  "notFound": {
+    "heading": "الصفحة غير موجودة",
+    "body": "الصفحة التي تبحث عنها غير متوفرة أو تم نقلها.",
+    "cta": "العودة إلى الرئيسية"
+  },
+  "error": {
+    "heading": "حدث خطأ غير متوقع",
+    "body": "نعتذر عن هذا العطل. حاول تحديث الصفحة.",
+    "retry": "إعادة المحاولة"
+  },
+  "loading": {
+    "label": "جارٍ التحميل"
+  },
+  "beforeAfter": {
+    "label": "مقارنة قبل وبعد",
+    "before": "قبل",
+    "after": "بعد"
+  },
+  "grade": {
+    "label": "الدرجة"
+  }
+}

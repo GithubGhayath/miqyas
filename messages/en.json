@@ -1,0 +1,163 @@
+{
+  "nav": {
+    "services": "Services",
+    "method": "Method",
+    "work": "Work",
+    "notes": "Field Notes",
+    "about": "About",
+    "contact": "Contact",
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "toggle": "Toggle theme"
+  },
+  "locale": {
+    "switch": "العربية",
+    "label": "Language"
+  },
+  "home": {
+    "heroPrimary": "Request a preliminary assessment",
+    "heroSecondary": "See how we work",
+    "factsVisit": "Site visit",
+    "factsDelivery": "Delivery",
+    "factsReceive": "You receive",
+    "factsReceiveValue": "report + CAD drawing + condition table",
+    "problemHeading": "The problem, stated plainly",
+    "scaleHeading": "The condition scale",
+    "servicesHeading": "Our services",
+    "servicesLink": "See all services",
+    "workHeading": "Latest work",
+    "workLink": "See all case studies",
+    "notesHeading": "Field notes",
+    "notesLink": "See all field notes",
+    "closingHeading": "Ready to start?",
+    "closingBody": "Send us the facility details, and we'll get back to you within two working days."
+  },
+  "services": {
+    "title": "Services",
+    "intro": "Four services, matched to what you need: a whole facility, one production line, a single machine, or recurring site presence.",
+    "whatItIs": "What it is",
+    "whoAsks": "Who asks for it",
+    "youReceive": "What you receive",
+    "duration": "Typical duration",
+    "exclusionsHeading": "Outside the scope of work",
+    "exclusionsBody": "We do not perform laboratory testing, destructive testing, legal title verification, or environmental assessment."
+  },
+  "method": {
+    "title": "Method",
+    "phasesHeading": "The five phases",
+    "clientRole": "Client's role",
+    "deliverables": "Deliverables",
+    "duration": "Duration",
+    "days": "days",
+    "importance": {
+      "critical": "Critical",
+      "core": "Core",
+      "supporting": "Supporting"
+    },
+    "tiersHeading": "Preliminary versus full assessment",
+    "tierPreliminary": "Preliminary",
+    "tierFull": "Full",
+    "referencesHeading": "Methodology references",
+    "referencesBody": "Our reporting structure follows ASTM E2018, and CEMA and DIN 22101 where conveyors are in scope."
+  },
+  "work": {
+    "title": "Work",
+    "pilotLabel": "Pilot project, documented at no charge",
+    "deliveredLabel": "Delivered project",
+    "equipmentHeading": "Equipment register",
+    "findingsHeading": "Findings",
+    "decisionHeading": "The decision this assessment enabled",
+    "briefHeading": "Brief",
+    "sector": "Sector",
+    "governorate": "Governorate",
+    "year": "Year"
+  },
+  "notes": {
+    "title": "Field Notes",
+    "readingTime": "min read",
+    "publishedOn": "Published"
+  },
+  "about": {
+    "title": "About",
+    "teamHeading": "Team",
+    "unknownHeading": "How we handle what we don't know",
+    "unknownBody": "First reports are reviewed by an independent senior engineer before delivery, and scope limits are written on page one of every report.",
+    "faqHeading": "Frequently asked questions"
+  },
+  "contact": {
+    "title": "Contact",
+    "name": "Name",
+    "email": "Email",
+    "organisation": "Organisation (optional)",
+    "country": "Country (optional)",
+    "facilityLocation": "Facility location (optional)",
+    "facilityType": "Facility type",
+    "facilityTypeOptions": {
+      "factory": "Factory",
+      "line": "Production line",
+      "warehouse": "Warehouse",
+      "machine": "Single machine",
+      "other": "Other"
+    },
+    "message": "Message",
+    "preferredContact": "Preferred contact method",
+    "preferredContactOptions": {
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "call": "Phone call"
+    },
+    "submit": "Send request",
+    "submitting": "Sending…",
+    "factsResponseTime": "Expected response time",
+    "factsHours": "Within {hours} hours",
+    "factsWorkingHours": "Working hours",
+    "factsLanguages": "Languages",
+    "factsPaymentNote": "Payment can be received through a representative outside Syria.",
+    "successHeading": "Your request has been received",
+    "successBody": "Reference number: {reference}. We'll get back to you within {hours} hours.",
+    "errorHeading": "The request could not be sent",
+    "errorBody": "A network error occurred. The details you entered are saved — you can try again.",
+    "retry": "Try again",
+    "errorSummaryHeading": "Please correct the following",
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "messageRequired": "Message is required",
+      "messageMin": "Message must be at least 20 characters",
+      "facilityTypeRequired": "Select a facility type",
+      "preferredContactRequired": "Select a preferred contact method"
+    }
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "location": "Location",
+    "email": "Email"
+  },
+  "notFound": {
+    "heading": "Page not found",
+    "body": "The page you are looking for does not exist or has moved.",
+    "cta": "Back to home"
+  },
+  "error": {
+    "heading": "Something went wrong",
+    "body": "Sorry about that. Try refreshing the page.",
+    "retry": "Try again"
+  },
+  "loading": {
+    "label": "Loading"
+  },
+  "beforeAfter": {
+    "label": "Before and after comparison",
+    "before": "Before",
+    "after": "After"
+  },
+  "grade": {
+    "label": "Grade"
+  }
+}
