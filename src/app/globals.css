@@ -1,26 +1,712 @@
 @import "tailwindcss";
 
+/* next-themes stamps the resolved theme name as a class on <html> (`.dark`
+   or `.light`); tell Tailwind's `dark:` variant to key off that class
+   instead of the OS `prefers-color-scheme`. Dark is the default theme
+   (UI-OVERHAUL-V4 §2), so `dark:` utilities target the *base* look and
+   `.light` carries the override tokens below. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 1 ── Tokens exposed to Tailwind v4 — "Signal" (UI-OVERHAUL-V4 §3).
+   Dark is the default/primary theme (§2) — the base @theme values below ARE
+   the dark palette; `.light` overrides them, the reverse of a typical
+   light-first setup. All `--void`/`--signal`/`--ember`/`--patina` tokens
+   from earlier passes are retired; nothing below reuses those names. */
+@theme {
+  --color-void: #0a0c0f;
+  --color-surface: #14171c;
+  --color-surface-2: #1c2027;
+  --color-surface-3: #262b33;
+  --color-ink: #f2f4f7;
+  --color-ink-2: #9aa3ae;
+  --color-ink-3: #6b7480;
+  --color-border: #333a44;
+
+  --color-signal: #35b4ff;
+  --color-signal-text: #7ccbff;
+  --color-ember: #ff9f1c;
+  --color-ember-text: #ffb84d;
+  --color-focus: #7ccbff;
+  --color-grade-chip-text: #0a0c0f;
+
+  --color-grade-1: #35b4ff;
+  --color-grade-2: #3fc29b;
+  --color-grade-3: #f2c14e;
+  --color-grade-4: #f2924e;
+  --color-grade-5: #f2564e;
+
+  /* Text placed on a solid signal/ember fill (buttons, active chips) — not
+     named in UI-OVERHAUL-V4 §3 explicitly; chosen per-theme since dark-mode
+     ember (bright) and light-mode ember (muted) don't take the same text
+     colour safely. Recorded in DECISIONS.md. */
+  --color-on-signal: #0a0c0f;
+  --color-on-ember: #0a0c0f;
+
+  --font-display: var(--font-display-en);
+  --font-text: var(--font-text-en);
+  --font-mono: var(--font-mono);
+
+  --radius-control: 2px;
+  --radius-none: 0px;
+
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --breakpoint-xs: 22.5rem; /* 360 */
+  --breakpoint-sm: 40rem; /* 640 */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 80rem; /* 1280 */
+  --breakpoint-2xl: 90rem; /* 1440 */
+  --breakpoint-3xl: 120rem; /* 1920 */
+
+  --spacing-3xs: 0.25rem;
+  --spacing-2xs: 0.5rem;
+  --spacing-xs: 0.75rem;
+  --spacing-s: 1rem;
+  --spacing-m: 1.5rem;
+  --spacing-l: 2.5rem;
+  --spacing-xl: 4rem;
+  --spacing-2xl: 6rem;
+  --spacing-3xl: 9rem;
+  --spacing-page-max: 1680px; /* UI-OVERHAUL-V4 §4.2 — wide, not 1240px */
+  --spacing-page-pad: clamp(1.25rem, 5vw, 4rem);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --step--1: clamp(0.833rem, 0.8rem + 0.15vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.25rem, 1.18rem + 0.35vw, 1.5rem);
+  --step-2: clamp(1.563rem, 1.44rem + 0.61vw, 2rem);
+  --step-3: clamp(1.953rem, 1.75rem + 1.02vw, 2.667rem);
+  --step-4: clamp(2.441rem, 2.11rem + 1.66vw, 3.556rem);
+  --step-5: clamp(3.052rem, 2.53rem + 2.61vw, 4.741rem);
+  /* Oversized display steps — UI-OVERHAUL-V4 §4.3, layout devices, not just
+     bigger headings. Allowed to clip at the viewport edge on the hero. */
+  --step-6: clamp(4.5rem, 3.2rem + 8vw, 11rem);
+  --step-7: clamp(6rem, 3.5rem + 13vw, 16rem);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 2 ── Theme overrides. Dark is the default (§2): the @theme block above IS
+   the dark palette, and next-themes stamps a `.light` class (not `.dark`)
+   to override it — the reverse of a typical light-first setup. */
+:root {
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.light {
+  color-scheme: light;
+  --color-void: #f7f9fb;
+  --color-surface: #eef1f4;
+  --color-surface-2: #e3e8ed;
+  --color-surface-3: #d7dde3;
+  --color-ink: #0b0d10;
+  --color-ink-2: #4b5563;
+  --color-ink-3: #6b7480;
+  --color-border: #c7ced6;
+
+  --color-signal: #0b6fcf;
+  --color-signal-text: #0a5fb0;
+  --color-ember: #c97417;
+  --color-ember-text: #a85f12;
+  --color-focus: #0a5fb0;
+  --color-grade-chip-text: #ffffff;
+
+  --color-grade-1: #0b6fcf;
+  --color-grade-2: #1e8f6f;
+  --color-grade-3: #b8860f;
+  --color-grade-4: #c2650f;
+  --color-grade-5: #c23b2e;
+
+  --color-on-signal: #ffffff;
+  --color-on-ember: #ffffff;
+}
+
+/* 3 ── Per-locale font binding + metrics */
+html[lang="ar"] {
+  --font-display: var(--font-display-ar);
+  --font-text: var(--font-text-ar);
+}
+html[lang="en"] {
+  --font-display: var(--font-display-en);
+  --font-text: var(--font-text-en);
+}
+html[lang="ar"] body {
+  line-height: 1.85;
+}
+html[lang="en"] body {
+  line-height: 1.6;
+}
+
+/* 4 ── Base */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-void);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  ::selection {
+    background: var(--color-signal);
+    color: var(--color-void);
+  }
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    line-height: 1.2;
+  }
+  html[lang="ar"] h1,
+  html[lang="ar"] h2 {
+    line-height: 1.38;
+    padding-block-start: 0.12em;
+  }
+  table {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 5 ── Component utilities */
+@layer components {
+  .u-display {
+    font-family: var(--font-display);
+  }
+  html[lang="ar"] .u-display {
+    font-size: 0.94em;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  html[lang="en"] .u-display {
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .measure-block {
+    max-inline-size: 68ch;
+  }
+
+  /* Layout primitives — UI-OVERHAUL-V4 §4.2. Two modes, chosen per section:
+     .bleed touches both viewport edges; .frame is a wide (not 1240px),
+     asymmetric working container. A page of .frame sections stacked with no
+     .bleed moment regresses to the "narrow column, empty sides" problem
+     this replaces — see §4.2's hard rule. */
+  .bleed {
+    width: 100%;
+  }
+  .frame {
+    max-inline-size: 1680px;
+    margin-inline: auto;
+    padding-inline: var(--spacing-page-pad);
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    column-gap: var(--spacing-m);
+  }
+  .frame > * {
+    grid-column: 2 / 16;
+  }
+  @media (max-width: 63.99rem) {
+    .frame {
+      display: block;
+      padding-inline: var(--spacing-page-pad);
+    }
+    .frame > * {
+      grid-column: auto;
+    }
+  }
+  /* Asymmetric span helpers for content deliberately placed off-centre
+     within a .frame row, rather than defaulting every block to the same
+     centred measure. */
+  .frame-prose {
+    grid-column: 2 / 10;
+  }
+  .frame-facts {
+    grid-column: 11 / 17;
+  }
+  @media (max-width: 63.99rem) {
+    .frame-prose,
+    .frame-facts {
+      grid-column: auto;
+    }
+  }
+
+  .skip-link {
+    position: fixed;
+    inset-inline-start: var(--spacing-s);
+    top: -3rem;
+    z-index: 100;
+    background: var(--color-void);
+    color: var(--color-ink);
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-2xs) var(--spacing-s);
+    transition: top 150ms var(--ease-standard);
+  }
+  .skip-link:focus {
+    top: var(--spacing-s);
+  }
+
+  /* Dimension rule — §7.1: a hairline with tick marks, carrying an optional
+     measured label centred and breaking the line, like a drawing dimension. */
+  .dimension-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    inline-size: 100%;
+    color: var(--color-ink-3);
+  }
+  .dimension-rule__tick {
+    flex: 0 0 auto;
+    inline-size: 1px;
+    block-size: 10px;
+    background: var(--color-border);
+  }
+  .dimension-rule__line {
+    flex: 1 1 auto;
+    block-size: 1px;
+    background: var(--color-border);
+    min-inline-size: var(--spacing-m);
+  }
+  .dimension-rule__label {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    white-space: nowrap;
+    padding-inline: var(--spacing-s);
+  }
+
+  /* Title block — §7.2: a hairline-bordered strip of labelled cells,
+     modelled on the title block of an engineering drawing. */
+  .title-block {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--color-border);
+  }
+  .title-block__cell {
+    border-inline-start: 1px solid var(--color-border);
+    padding: var(--spacing-xs) var(--spacing-s);
+    min-inline-size: 0;
+  }
+  .title-block__cell:first-child {
+    border-inline-start: none;
+  }
+  .title-block__label {
+    display: block;
+    font-size: var(--step--1, 0.9rem);
+    color: var(--color-ink-3);
+    margin-block-end: var(--spacing-3xs);
+  }
+  .title-block__value {
+    display: block;
+    font-family: var(--font-mono);
+    color: var(--color-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  @media (max-width: 47.99rem) {
+    .title-block {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .title-block__cell:nth-child(2) {
+      border-inline-start: none;
+    }
+    .title-block__cell:nth-child(3),
+    .title-block__cell:nth-child(4) {
+      border-block-start: 1px solid var(--color-border);
+    }
+    .title-block__cell:nth-child(3) {
+      border-inline-start: none;
+    }
+  }
+
+  /* Report spread — §7.3: narrow facts column (mono, measured), wide prose
+     column, mirrored automatically by writing-direction via logical props. */
+  .report-spread {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-m);
+  }
+  @media (min-width: 48rem) {
+    .report-spread {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 8fr);
+      gap: var(--spacing-l);
+      align-items: start;
+    }
+  }
+  .report-spread__facts {
+    font-family: var(--font-mono);
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-m);
+    overflow-x: auto;
+    padding-block-end: var(--spacing-2xs);
+  }
+  @media (min-width: 48rem) {
+    .report-spread__facts {
+      flex-direction: column;
+      overflow-x: visible;
+    }
+  }
+  .report-spread__fact {
+    flex: 0 0 auto;
+    border-inline-start: 2px solid var(--color-border);
+    padding-inline-start: var(--spacing-xs);
+  }
+  .report-spread__fact-label {
+    display: block;
+    font-family: var(--font-text);
+    font-size: var(--step--1, 0.9rem);
+    color: var(--color-ink-3);
+  }
+  .report-spread__fact-value {
+    display: block;
+    color: var(--color-ink);
+  }
+  .report-spread__prose {
+    max-inline-size: 68ch;
+  }
+
+  /* Grade chip — §7.4: numeral + segmented bar + colour, never colour alone. */
+  .grade-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2xs);
+    font-family: var(--font-mono);
+  }
+  .grade-chip__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.75em;
+    block-size: 1.75em;
+    border-radius: 50%;
+    background: var(--grade-color);
+    color: var(--grade-ink);
+    font-weight: 600;
+  }
+  .grade-chip__bar {
+    display: inline-flex;
+    gap: 2px;
+  }
+  .grade-chip__seg {
+    inline-size: 8px;
+    block-size: 10px;
+    background: var(--color-border);
+  }
+  .grade-chip__seg--filled {
+    background: var(--grade-color);
+  }
+
+  /* Sheet margin — §7.5: coordinate ticks in the desktop page margin. */
+  .sheet-margin {
+    position: fixed;
+    inset-inline-start: 0;
+    top: 0;
+    bottom: 0;
+    inline-size: 28px;
+    display: none;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    color: var(--color-ink-3);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @media (min-width: 80rem) {
+    .sheet-margin {
+      display: flex;
+    }
+  }
+
+  /* Near-invisible grain — UI-REFACTOR-PROMPT §3.4. Answers "flat structure
+     needs tactility" (§1.3); kept faint enough not to read as an effect. */
+  .grain-overlay,
+  .grain-local {
+    opacity: 0.025;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .grain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+  }
+  .grain-local {
+    position: absolute;
+    inset: 0;
+  }
+  @media print {
+    .grain-overlay,
+    .grain-local {
+      display: none;
+    }
+  }
+
+  /* Case-study / portrait duotone — UI-REFACTOR-PROMPT §4.2, §5.2. Both
+     accent hues are the site's own tokens, so every processed photo reads as
+     "measured by this system," not a generic Instagram-style duotone filter.
+     The grayscale filter sits on the <img> itself, not this wrapper — a
+     filter on the wrapper would flatten the ::after colour overlay right
+     back to grayscale, since filter post-processes the whole rendered
+     subtree including already-blended children. The overlay is ::after, not
+     ::before: a ::before paints behind the <img> sibling in stacking order,
+     so with an opaque photo on top it would be completely hidden and the
+     mix-blend-mode would have nothing to blend onto. */
+  .duotone {
+    position: relative;
+  }
+  .duotone > img {
+    filter: grayscale(1) contrast(1.05);
+    transition: filter 420ms var(--ease-standard);
+  }
+  .duotone::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--color-signal) 0%, var(--color-ember) 100%);
+    mix-blend-mode: color;
+    pointer-events: none;
+    transition: opacity 420ms var(--ease-standard);
+  }
+  .duotone-fade.is-revealed > img {
+    filter: none;
+  }
+  .duotone-fade.is-revealed::after {
+    opacity: 0;
+  }
+
+  /* Team layout trace — UI-REFACTOR-PROMPT §4.4: a single continuous hairline
+     running behind the cards, in the same quiet visual language as a wiring
+     schematic. Vertical on mobile (one column), horizontal on desktop. */
+  .team-trace {
+    position: relative;
+  }
+  .team-trace::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    background: var(--color-border);
+    inset-inline-start: 50%;
+    top: 0;
+    bottom: 0;
+    inline-size: 1px;
+  }
+  @media (min-width: 48rem) {
+    .team-trace::before {
+      inset-inline-start: 0;
+      inset-inline-end: 0;
+      top: 45%;
+      bottom: auto;
+      inline-size: auto;
+      block-size: 1px;
+    }
+  }
+  .team-trace > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Work hero letterboxing — UI-REFACTOR-PROMPT §5.2. Desktop (≥1024px) only:
+     a fixed 21:9 crop with ink-coloured bars, evoking documentary framing.
+     Below that, a normal cropped 16:9 — letterboxing would waste scarce
+     vertical space on a small screen. */
+  .letterbox {
+    aspect-ratio: 16 / 9;
+  }
+  .letterbox img {
+    object-fit: cover;
+  }
+  @media (min-width: 64rem) {
+    .letterbox {
+      aspect-ratio: 21 / 9;
+      /* Wins over the .bg-surface utility also applied on this element —
+         Tailwind's utility layer otherwise outranks this components-layer rule. */
+      background: var(--color-ink) !important;
+    }
+    .letterbox img {
+      object-fit: contain;
+    }
+  }
+
+  /* Slow Ken Burns drift on static cover photography — §5.2. */
+  .ken-burns {
+    animation: ken-burns-drift 48s linear infinite alternate;
+  }
+  .ken-burns:hover,
+  .ken-burns:focus-within {
+    animation-play-state: paused;
+  }
+  @keyframes ken-burns-drift {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.06);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ken-burns {
+      animation: none;
+    }
+  }
+}
+
+/* 6a ── Route-level View Transitions — UI-REFACTOR-PROMPT §3.1.
+   Three distinct mechanisms, each reserved for one meaning:
+   directional slide (index ↔ detail, RTL-aware), a shutter wipe (Work index
+   → detail only), and a named morph on the Work cover image. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* The header carries its own transition group so it never slides with the
+   rest of the page — one fixed reference point during a directional move. */
+::view-transition-group(site-header) {
+  animation: none;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-slide-out {
+  to {
+    translate: var(--vt-slide-offset-out, -60px) 0;
+  }
+}
+@keyframes vt-slide-in {
+  from {
+    translate: var(--vt-slide-offset-in, 60px) 0;
+  }
+}
+
+:root.nav-forward {
+  --vt-slide-offset-out: -60px;
+  --vt-slide-offset-in: 60px;
+}
+:root.nav-back {
+  --vt-slide-offset-out: 60px;
+  --vt-slide-offset-in: -60px;
+}
+[dir="rtl"]:root.nav-forward {
+  --vt-slide-offset-out: 60px;
+  --vt-slide-offset-in: -60px;
+}
+[dir="rtl"]:root.nav-back {
+  --vt-slide-offset-out: -60px;
+  --vt-slide-offset-in: 60px;
+}
+
+:root.nav-forward::view-transition-old(root),
+:root.nav-back::view-transition-old(root) {
+  animation:
+    150ms ease-in both vt-fade-out,
+    400ms ease-in-out both vt-slide-out;
+}
+:root.nav-forward::view-transition-new(root),
+:root.nav-back::view-transition-new(root) {
+  animation:
+    210ms ease-out 150ms both vt-fade-in,
+    400ms ease-in-out both vt-slide-in;
+}
+
+/* Work index → detail: a horizontal wipe, like a projector shutter opening —
+   deliberately distinct from the ordinary directional slide above. */
+@keyframes vt-shutter-open {
+  from {
+    clip-path: inset(0 50% 0 50%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+:root.case-reveal::view-transition-new(root) {
+  animation: 520ms cubic-bezier(0.22, 1, 0.36, 1) both vt-shutter-open;
+}
+:root.case-reveal::view-transition-old(root) {
+  animation: 260ms ease-in both vt-fade-out;
+}
+
+/* The one shared-element morph on the site: a Work case study's cover photo
+   is the same object on the index card and the detail hero. */
+@keyframes vt-morph-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+::view-transition-group(case-idle-food-canning-line-rural-damascus),
+::view-transition-group(case-partially-damaged-metal-foundry-aleppo),
+::view-transition-group(case-warehouse-material-handling-homs) {
+  animation-duration: 420ms;
+}
+::view-transition-image-pair(case-idle-food-canning-line-rural-damascus),
+::view-transition-image-pair(case-partially-damaged-metal-foundry-aleppo),
+::view-transition-image-pair(case-warehouse-material-handling-homs) {
+  animation-name: vt-morph-blur;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* 6 ── Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 7 ── Print */
+@media print {
+  .no-print,
+  header nav,
+  .sheet-margin,
+  .theme-toggle,
+  .locale-switcher {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+  }
+  .report-spread {
+    display: block;
+  }
+  img {
+    break-inside: avoid;
+  }
 }

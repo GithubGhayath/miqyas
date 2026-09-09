@@ -1,5 +1,10 @@
 {
+  "splash": {
+    "label": "Loading",
+    "announce": "Loading, {percent} percent"
+  },
   "nav": {
+    "primary": "Primary navigation",
     "services": "Services",
     "method": "Method",
     "work": "Work",
@@ -21,7 +26,7 @@
   },
   "home": {
     "heroPrimary": "Request a preliminary assessment",
-    "heroSecondary": "See how we work",
+    "heroSecondary": "See exactly what happens on site",
     "factsVisit": "Site visit",
     "factsDelivery": "Delivery",
     "factsReceive": "You receive",
@@ -39,7 +44,7 @@
   },
   "services": {
     "title": "Services",
-    "intro": "Four services, matched to what you need: a whole facility, one production line, a single machine, or recurring site presence.",
+    "intro": "Four services. Nothing vague between them.",
     "whatItIs": "What it is",
     "whoAsks": "Who asks for it",
     "youReceive": "What you receive",
@@ -80,7 +85,8 @@
   "notes": {
     "title": "Field Notes",
     "readingTime": "min read",
-    "publishedOn": "Published"
+    "publishedOn": "Published",
+    "backToNotes": "Back to field notes"
   },
   "about": {
     "title": "About",
@@ -119,7 +125,7 @@
     "factsLanguages": "Languages",
     "factsPaymentNote": "Payment can be received through a representative outside Syria.",
     "successHeading": "Your request has been received",
-    "successBody": "Reference number: {reference}. We'll get back to you within {hours} hours.",
+    "successBody": "Received, reference {reference}. We reply within {hours} hours.",
     "errorHeading": "The request could not be sent",
     "errorBody": "A network error occurred. The details you entered are saved — you can try again.",
     "retry": "Try again",

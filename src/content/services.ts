@@ -14,11 +14,11 @@ export const services: Service[] = [
     },
     whatItIs: {
       ar: [
-        'مسح بصري شامل للمنشأة يغطي المبنى والبنية التحتية وخطوط الإنتاج الرئيسية، مع تسجيل لوحات البيانات وقياسات ميدانية أساسية.',
+        'مسح بصري منهجي للمنشأة يغطي المبنى والبنية التحتية وخطوط الإنتاج الرئيسية، مع تسجيل لوحات البيانات وقياسات ميدانية أساسية.',
         'يُصنَّف كل نظام رئيسي على سلم حالة من خمس درجات، مع ملاحظات حول العمر التشغيلي المتبقي المقدَّر ونطاق تقريبي لكلفة الإصلاح مقابل الاستبدال.',
       ],
       en: [
-        'A comprehensive visual survey of the facility covering the building envelope, infrastructure, and principal production lines, with nameplate capture and basic field measurements.',
+        'A systematic visual survey of the facility, covering the building envelope, infrastructure, and principal production lines, with nameplate capture and basic field measurements.',
         'Every major system is graded on the five-point condition scale, with notes on estimated remaining useful life and an approximate cost band for repair versus replacement.',
       ],
     },
