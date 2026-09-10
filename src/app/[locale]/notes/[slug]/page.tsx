@@ -47,45 +47,56 @@ export default async function FieldNotePage({
   if (!note) notFound();
 
   return (
-    <PageShell>
-      <article>
-        <TransitionLink
-          href="/notes"
-          transition="nav-back"
-          className="mb-[var(--spacing-m)] inline-flex items-center gap-[var(--spacing-2xs)] text-[length:var(--step--1)] text-signal-text hover:underline"
-        >
-          <ArrowLeft aria-hidden="true" size={16} className="rtl:-scale-x-100" />
-          {t('backToNotes')}
-        </TransitionLink>
-        <header>
-          <span className="flex flex-wrap gap-x-[var(--spacing-m)] font-mono text-[length:var(--step--1)] text-ink-3">
-            <span>{formatIsoDate(note.publishedAt, l)}</span>
-            <span>
-              {note.readingMinutes} {t('readingTime')}
+    <>
+      <PageShell>
+        <article>
+          <TransitionLink
+            href="/notes"
+            transition="nav-back"
+            className="mb-[var(--spacing-m)] inline-flex items-center gap-[var(--spacing-2xs)] text-[length:var(--step--1)] text-signal-text hover:underline"
+          >
+            <ArrowLeft aria-hidden="true" size={16} className="rtl:-scale-x-100" />
+            {t('backToNotes')}
+          </TransitionLink>
+          <header>
+            <span className="flex flex-wrap gap-x-[var(--spacing-m)] font-mono text-[length:var(--step--1)] text-ink-3">
+              <span>{formatIsoDate(note.publishedAt, l)}</span>
+              <span>
+                {note.readingMinutes} {t('readingTime')}
+              </span>
             </span>
-          </span>
-          <KineticHeading as="h1" className="mt-[var(--spacing-2xs)] u-display text-[length:var(--step-4)] text-ink">
-            {pick(note.title, l)}
-          </KineticHeading>
-          <p className="mt-[var(--spacing-s)] measure-block text-[length:var(--step-1)] text-ink-2">
-            {pick(note.standfirst, l)}
-          </p>
-        </header>
+            <KineticHeading as="h1" className="mt-[var(--spacing-2xs)] u-display text-[length:var(--step-4)] text-ink">
+              {pick(note.title, l)}
+            </KineticHeading>
+            <p className="mt-[var(--spacing-s)] measure-block text-[length:var(--step-1)] text-ink-2">
+              {pick(note.standfirst, l)}
+            </p>
+          </header>
+        </article>
+      </PageShell>
 
-        <MediaFigure image={note.cover} priority />
+      {/* Full-bleed cover, not frame-constrained (UI-OVERHAUL-V4 §11) — the
+          body text below stays measure-width for legibility, but the cover
+          image is the page's one cinematic moment. */}
+      <div className="bleed">
+        <MediaFigure image={note.cover} priority useIntrinsicAspectRatio={false} containerClassName="letterbox" />
+      </div>
 
-        <div className="measure-block mt-[var(--spacing-m)] flex flex-col gap-[var(--spacing-s)] text-ink-2">
-          {pick(note.body, l).map((paragraph, index) => {
-            const figure = note.figures?.find((f) => f.after === index);
-            return (
-              <div key={index} className="flex flex-col gap-[var(--spacing-m)]">
-                <p>{paragraph}</p>
-                {figure ? <MediaFigure image={figure.image} caption={figure.caption} /> : null}
-              </div>
-            );
-          })}
-        </div>
-      </article>
-    </PageShell>
+      <PageShell>
+        <article>
+          <div className="measure-block flex flex-col gap-[var(--spacing-s)] text-ink-2">
+            {pick(note.body, l).map((paragraph, index) => {
+              const figure = note.figures?.find((f) => f.after === index);
+              return (
+                <div key={index} className="flex flex-col gap-[var(--spacing-m)]">
+                  <p>{paragraph}</p>
+                  {figure ? <MediaFigure image={figure.image} caption={figure.caption} /> : null}
+                </div>
+              );
+            })}
+          </div>
+        </article>
+      </PageShell>
+    </>
   );
 }

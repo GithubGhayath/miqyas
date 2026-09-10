@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import gsap from 'gsap';
+import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import type { SurveyPin } from '@/content/types';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useDirection } from '@/hooks/useDirection';
@@ -12,12 +14,21 @@ import { GradeChip } from '@/components/ui/GradeChip';
 import { Measure } from '@/components/ui/Measure';
 import { springSnappy } from '@/lib/motion';
 
+gsap.registerPlugin(DrawSVGPlugin);
+
+// A fixed coordinate space the connector SVG stretches to fill (see
+// preserveAspectRatio="none" below) — lets pin xPct/yPct map directly to
+// viewBox units without a separate unit-conversion step.
+const VIEWBOX_W = 800;
+const VIEWBOX_H = 500;
+const CONNECTOR_LENGTH = 28;
+
 const HERO_IMAGE_SRC = 'https://picsum.photos/seed/miqyas-hero-line/1600/1000';
 
 export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
   const { t } = useLocalized();
   const tGrade = useTranslations('grade');
-  const { dir } = useDirection();
+  const { dir, sign } = useDirection();
   const reduceMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 39.99rem)');
   const [openPinId, setOpenPinId] = useState<string | null>(null);
@@ -27,6 +38,7 @@ export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
   const tiltRef = useRef<HTMLDivElement>(null);
   const baseId = useId();
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const lineRefs = useRef<Record<string, SVGLineElement | null>>({});
 
   function onTiltMove(event: React.MouseEvent<HTMLDivElement>) {
     if (reduceMotion || isMobile || !window.matchMedia('(pointer: fine)').matches) return;
@@ -43,6 +55,23 @@ export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
   }, []);
 
   const visiblePins = isMobile ? pins.filter((p) => !p.hideOnMobile) : pins;
+
+  useEffect(() => {
+    const targets = (isMobile ? pins.filter((p) => !p.hideOnMobile) : pins)
+      .map((pin) => lineRefs.current[pin.id])
+      .filter((el): el is SVGLineElement => el !== null);
+    if (targets.length === 0) return;
+    if (reduceMotion) {
+      gsap.set(targets, { drawSVG: '100%' });
+      return;
+    }
+    gsap.set(targets, { drawSVG: '0%' });
+    if (!loaded) return;
+    const tweens = targets.map((line, index) =>
+      gsap.to(line, { drawSVG: '100%', duration: 0.3, delay: index * 0.09, ease: 'power2.out' }),
+    );
+    return () => tweens.forEach((tween) => tween.kill());
+  }, [loaded, pins, isMobile, reduceMotion]);
 
   function closePin(returnFocusId?: string) {
     setOpenPinId((current) => {
@@ -94,6 +123,34 @@ export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
             data-critical="true"
           />
         </m.div>
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
+          preserveAspectRatio="none"
+        >
+          {visiblePins.map((pin) => {
+            const physicalXPct = dir === 'rtl' ? 100 - pin.xPct : pin.xPct;
+            const x1 = (physicalXPct / 100) * VIEWBOX_W;
+            const y1 = (pin.yPct / 100) * VIEWBOX_H;
+            const x2 = x1 + sign * CONNECTOR_LENGTH;
+            return (
+              <line
+                key={pin.id}
+                ref={(el) => {
+                  lineRefs.current[pin.id] = el;
+                }}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y1}
+                vectorEffect="non-scaling-stroke"
+                strokeWidth={1.5}
+                className="stroke-signal"
+              />
+            );
+          })}
+        </svg>
         <ul className="absolute inset-0 list-none" role="list">
           {visiblePins.map((pin, index) => {
             const open = openPinId === pin.id;
@@ -105,23 +162,6 @@ export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
                 className="absolute"
                 style={{ insetInlineStart: `${pin.xPct}%`, top: `${pin.yPct}%` }}
               >
-                <m.span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute block h-px bg-signal"
-                  style={{
-                    width: 28,
-                    insetInlineStart: 0,
-                    top: 0,
-                    transformOrigin: dir === 'rtl' ? 'right' : 'left',
-                  }}
-                  initial={reduceMotion ? false : { scaleX: 0 }}
-                  animate={{ scaleX: reduceMotion ? 1 : loaded ? 1 : 0 }}
-                  transition={{
-                    duration: reduceMotion ? 0 : 0.3,
-                    delay: reduceMotion ? 0 : index * 0.09,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                />
                 <button
                   ref={(el) => {
                     btnRefs.current[pin.id] = el;

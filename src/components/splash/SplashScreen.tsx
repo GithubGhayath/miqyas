@@ -11,8 +11,8 @@ import { Measure } from '@/components/ui/Measure';
 
 const MIN_DISPLAY_MS = 900;
 const MAX_TIMEOUT_MS = 4500;
-const SESSION_KEY = 'miqyas:first-light-played';
 const ANNOUNCE_STEP = 20;
+const HIDE_TRANSITION_MS = 650; // must match the CSS transition duration below
 
 function roundToStep(value: number): number {
   return Math.floor(value / ANNOUNCE_STEP) * ANNOUNCE_STEP;
@@ -35,21 +35,18 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
   const displayRef = useRef({ value: 0 });
 
   useEffect(() => {
-    let alreadyPlayed = false;
-    try {
-      alreadyPlayed = sessionStorage.getItem(SESSION_KEY) === '1';
-    } catch {
-      alreadyPlayed = false;
-    }
-    // Whether the splash renders at all, and whether it runs its motion,
-    // both depend on client-only state (sessionStorage, a media query) that
-    // isn't known during SSR — an effect-driven render decision is the
-    // correct pattern here, not a workaround for one.
+    // Whether the splash's motion is reduced depends on client-only state
+    // (a media query) that isn't known during SSR — an effect-driven render
+    // decision is the correct pattern here, not a workaround for one.
+    // No persisted "already played" flag: this component only ever mounts
+    // on a genuine full page load (Next.js keeps the root layout — and this
+    // component inside it — mounted across client-side navigation within
+    // the same session, so an internal Link click never re-runs this effect
+    // in the first place). A `sessionStorage` gate here would only ever
+    // suppress replays on a *hard refresh*, which the spec explicitly wants
+    // to still show — that mismatch was the reported bug.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setShouldRender(!alreadyPlayed);
-    if (alreadyPlayed) {
-      return;
-    }
+    setShouldRender(true);
 
     const main = document.getElementById('main');
     main?.setAttribute('inert', '');
@@ -67,8 +64,8 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
       }
       gsap.to(displayRef.current, {
         value: targetPct,
-        duration: 0.4,
-        ease: 'power2.out',
+        duration: 0.6,
+        ease: 'power3.out',
         onUpdate: () => setPercent(Math.round(displayRef.current.value)),
       });
     }
@@ -97,18 +94,13 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
     function complete() {
       if (cancelled) return;
       setDisplayPercent(1);
-      try {
-        sessionStorage.setItem(SESSION_KEY, '1');
-      } catch {
-        /* private browsing / storage disabled — replay next time, harmless */
-      }
       main?.removeAttribute('inert');
       setIgniting(true);
       const flashDelay = reduceMotion ? 0 : IGNITION_DURATION * 1000 + 300;
       setTimeout(() => {
         if (cancelled) return;
         setHiding(true);
-        setTimeout(() => setShouldRender(false), reduceMotion ? 0 : 500);
+        setTimeout(() => setShouldRender(false), reduceMotion ? 0 : HIDE_TRANSITION_MS);
       }, flashDelay);
     }
 
@@ -131,8 +123,11 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
       className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-void"
       style={{
         opacity: hiding ? 0 : 1,
+        transform: hiding ? 'scale(1.03)' : 'scale(1)',
         pointerEvents: hiding ? 'none' : 'auto',
-        transition: reduceMotion ? 'none' : 'opacity 500ms ease',
+        transition: reduceMotion
+          ? 'none'
+          : `opacity ${HIDE_TRANSITION_MS}ms var(--ease-standard), transform ${HIDE_TRANSITION_MS}ms var(--ease-standard)`,
       }}
       role="status"
       aria-live="polite"
@@ -149,7 +144,11 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
             <stop offset="100%" stopColor={sketchColor} stopOpacity="0" />
           </radialGradient>
           <clipPath id="splash-aperture">
-            <circle cx="160" cy="100" r={(aperturePct / 100) * 260} style={{ transition: 'r 200ms ease' }} />
+            {/* No CSS transition on `r`: its value already updates every
+                animation frame from a GSAP-tweened percent (below), so a
+                second transition layered on top would smooth an already-
+                smooth value and read as laggy/rubbery instead of crisp. */}
+            <circle cx="160" cy="100" r={(aperturePct / 100) * 260} />
           </clipPath>
         </defs>
 
@@ -167,7 +166,12 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
         {/* Lit sketch — revealed by the widening aperture clip. */}
         <g clipPath="url(#splash-aperture)">
           <circle cx="160" cy="100" r="90" fill="url(#splash-glow)" opacity="0.5" />
-          <g stroke={sketchColor} strokeWidth="1.25" fill="none" style={{ transition: 'stroke 200ms ease' }}>
+          <g
+            stroke={sketchColor}
+            strokeWidth="1.25"
+            fill="none"
+            style={{ transition: 'stroke var(--duration-ignition) var(--ease-ignition)' }}
+          >
             <rect x="60" y="40" width="200" height="120" />
             <line x1="60" y1="30" x2="60" y2="20" />
             <line x1="260" y1="30" x2="260" y2="20" />

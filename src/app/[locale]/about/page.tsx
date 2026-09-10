@@ -7,8 +7,9 @@ import { buildMetadata } from '@/lib/metadata';
 import { PageShell } from '@/components/layout/PageShell';
 import { DimensionRule } from '@/components/ui/DimensionRule';
 import { Accordion } from '@/components/ui/Accordion';
-import { SpotlightMember } from '@/components/about/SpotlightMember';
+import { TeamCard } from '@/components/about/TeamCard';
 import { KineticHeading } from '@/components/motion/KineticHeading';
+import { BatchRevealGrid } from '@/components/motion/BatchRevealGrid';
 
 export async function generateMetadata({
   params,
@@ -45,12 +46,25 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </header>
       </PageShell>
 
-      {/* Spotlight Roster — UI-OVERHAUL-V4 §7. A full-bleed section, not a
-          card grid: every page needs at least one bleed moment (§4.2). */}
-      <section aria-label={t('teamHeading')}>
-        {team.map((member) => (
-          <SpotlightMember key={member.id} member={member} />
-        ))}
+      {/* Team grid — full-bleed band (every page needs a bleed moment,
+          §4.2), with the grid itself kept to the site's normal content
+          width inside it. Each portrait tilts toward the cursor and
+          resolves to colour under a cursor-tracked spotlight; the whole
+          grid rises in staggered as it scrolls into view. */}
+      <section className="bleed team-trace border-y border-border py-[var(--spacing-xl)]">
+        <div className="mx-auto max-w-[var(--spacing-page-max)] px-[var(--spacing-page-pad)]">
+          <KineticHeading as="h2" className="u-display text-[length:var(--step-2)] text-ink">
+            {t('teamHeading')}
+          </KineticHeading>
+          <BatchRevealGrid
+            className="mt-[var(--spacing-m)] grid grid-cols-1 gap-x-[var(--spacing-l)] gap-y-[var(--spacing-2xl)] sm:grid-cols-2 lg:grid-cols-3"
+            rise={32}
+          >
+            {team.map((member) => (
+              <TeamCard key={member.id} member={member} locale={l} />
+            ))}
+          </BatchRevealGrid>
+        </div>
       </section>
 
       <PageShell>

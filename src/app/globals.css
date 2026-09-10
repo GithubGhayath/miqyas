@@ -68,8 +68,16 @@
   --spacing-xl: 4rem;
   --spacing-2xl: 6rem;
   --spacing-3xl: 9rem;
-  --spacing-page-max: 1680px; /* UI-OVERHAUL-V4 §4.2 — wide, not 1240px */
+  --spacing-page-max: 2400px; /* UI-OVERHAUL-V4 §4.2 — wide, not 1240px; raised again on user feedback that 1680px still read as a narrow column on large monitors */
   --spacing-page-pad: clamp(1.25rem, 5vw, 4rem);
+
+  /* The site's one "ignition" timing pair (UI-OVERHAUL-V4 §5.5) — reused
+     literally everywhere something switches on, including CSS-only spots
+     (the primary CTA hover, the splash completion flash) that can't import
+     the JS constants of the same values in src/lib/ignition.ts (duration
+     0.2s / ease power2.out). Keep all three definitions in sync by hand. */
+  --duration-ignition: 200ms;
+  --ease-ignition: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* power2.out */
 }
 
 :root {
@@ -200,15 +208,21 @@ html[lang="en"] body {
     width: 100%;
   }
   .frame {
-    max-inline-size: 1680px;
+    max-inline-size: var(--spacing-page-max);
     margin-inline: auto;
     padding-inline: var(--spacing-page-pad);
     display: grid;
     grid-template-columns: repeat(16, 1fr);
     column-gap: var(--spacing-m);
   }
+  /* Full 16 columns by default — `padding-inline` above already provides
+     the page's edge gutter, so insetting every child by an extra column on
+     each side (the previous `2 / 16`) doubled up on that margin and read
+     as a narrow column even inside an already-wide .frame. Deliberately
+     off-centre content (ReportSpread's facts/prose split) still opts into
+     `.frame-prose`/`.frame-facts` below. */
   .frame > * {
-    grid-column: 2 / 16;
+    grid-column: 1 / 17;
   }
   @media (max-width: 63.99rem) {
     .frame {
@@ -482,6 +496,64 @@ html[lang="en"] body {
   }
   .duotone-fade.is-revealed::after {
     opacity: 0;
+  }
+
+  /* Team card corner brackets — a viewfinder/technical-drawing register
+     mark, not a decorative glow, drawn in on hover/focus of the portrait
+     it sits inside. Sized and positioned with plain physical corners
+     (top/bottom + left/right border sides) since a mirrored bracket reads
+     identically either direction — nothing here needs to flip for RTL. */
+  .team-portrait__corner {
+    position: absolute;
+    inline-size: 22px;
+    block-size: 22px;
+    opacity: 0;
+    transform: scale(0.7);
+    transition:
+      opacity 260ms var(--ease-standard),
+      transform 260ms var(--ease-standard);
+    pointer-events: none;
+  }
+  .team-portrait:hover .team-portrait__corner,
+  .team-portrait:focus-within .team-portrait__corner {
+    opacity: 1;
+    transform: scale(1);
+  }
+  /* Colour goes inside each side's own shorthand, not a separate
+     `border-color` declaration above: a `border-*-start: <width> <style>`
+     shorthand with no colour term resets that side's colour to
+     `currentcolor` regardless of what an earlier `border-color` set. */
+  .team-portrait__corner--tl {
+    top: 12px;
+    inset-inline-start: 12px;
+    border-block-start: 2px solid var(--color-signal);
+    border-inline-start: 2px solid var(--color-signal);
+  }
+  .team-portrait__corner--br {
+    bottom: 12px;
+    inset-inline-end: 12px;
+    border-block-end: 2px solid var(--color-signal);
+    border-inline-end: 2px solid var(--color-signal);
+  }
+
+  /* Team-card role accent — the same "something switching on" register as
+     the ignition tokens, scaled down to a hairline: grows in under the
+     role label when its sibling portrait is hovered/focused. */
+  .team-role-accent {
+    display: inline-block;
+    inline-size: 28px;
+    block-size: 2px;
+    background: var(--color-signal);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-ignition) var(--ease-ignition);
+  }
+  :dir(rtl) .team-role-accent {
+    transform-origin: right;
+  }
+  .team-portrait:hover ~ * .team-role-accent,
+  .team-portrait:focus-within ~ * .team-role-accent {
+    transform: scaleX(1);
   }
 
   /* Team layout trace — UI-REFACTOR-PROMPT §4.4: a single continuous hairline

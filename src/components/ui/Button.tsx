@@ -9,8 +9,11 @@ const base =
 
 const variants: Record<Variant, string> = {
   // Ember is an ignition colour (UI-OVERHAUL-V4 §3.4) — the primary CTA is
-  // exactly the kind of "something turning on" moment it's reserved for.
-  primary: 'bg-ember text-on-ember hover:bg-ember-text',
+  // exactly the kind of "something turning on" moment it's reserved for, so
+  // its hover reuses the site's one ignition duration (§5.5) instead of the
+  // base 120ms used for ordinary colour transitions.
+  primary:
+    'bg-ember text-on-ember duration-[var(--duration-ignition)] ease-[var(--ease-ignition)] hover:bg-ember-text',
   secondary: 'border border-border text-signal-text hover:bg-surface',
 };
 

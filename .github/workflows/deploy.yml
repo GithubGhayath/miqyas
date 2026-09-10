@@ -1,0 +1,107 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+# Only one Pages deployment at a time; let an in-flight one finish rather
+# than cancelling it mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # Runs on every push and pull request: catches breakage before it ever
+  # reaches main. Does not deploy anything.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Build (static export)
+        run: npm run build
+
+  # Only on a push to main: rebuilds with the GitHub Pages base path baked
+  # in (project pages are served from /<repo-name>/, not the domain root)
+  # and publishes the result. Skipped for pull requests, which only need
+  # the build job above to prove the change doesn't break anything.
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Determine base path
+        id: basepath
+        # Empty for a user/org page repo (<owner>.github.io, served from the
+        # domain root); "/<repo-name>" for a project page (served from
+        # https://<owner>.github.io/<repo-name>/) — see next.config.ts,
+        # which reads this back as NEXT_BASE_PATH.
+        run: |
+          if [ "${{ github.event.repository.name }}" = "${{ github.repository_owner }}.github.io" ]; then
+            echo "value=" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=/${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build (static export)
+        env:
+          NEXT_BASE_PATH: ${{ steps.basepath.outputs.value }}
+        run: npm run build
+
+      - name: Disable Jekyll processing
+        # Without this, GitHub Pages runs the output through Jekyll, which
+        # silently drops every underscore-prefixed path — including
+        # Next.js's entire _next/ assets directory (all JS/CSS 404s).
+        run: touch ./out/.nojekyll
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -5,6 +5,9 @@ import { siteUrl } from '@/lib/metadata';
 
 const staticRoutes = ['', '/services', '/method', '/work', '/notes', '/about', '/contact'];
 
+// Required for static export (output: 'export') — see robots.ts.
+export const dynamic = 'force-static';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [caseStudies, fieldNotes] = await Promise.all([getCaseStudies(), getFieldNotes()]);
 

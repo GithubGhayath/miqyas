@@ -12,6 +12,7 @@ import { displayAr, displayEn, mono, textAr, textEn } from '../fonts';
 import { MotionProvider } from '@/components/motion/MotionProvider';
 import { ViewTransitionsProvider } from '@/components/motion/ViewTransitionsProvider';
 import { SmoothScroll } from '@/components/providers/SmoothScroll';
+import { CameraMoveSections } from '@/components/motion/CameraMoveSections';
 import { SplashScreen } from '@/components/splash/SplashScreen';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -62,7 +63,19 @@ export default async function LocaleLayout({
       className={`${displayAr.variable} ${displayEn.variable} ${textAr.variable} ${textEn.variable} ${mono.variable}`}
     >
       <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        {/* Next's own recommended JSON-LD pattern for the App Router (a
+            native <script type="application/ld+json">, not next/script —
+            see node_modules/next/dist/docs/01-app/02-guides/json-ld.md):
+            React's dev-mode console still logs a generic "script tag
+            rendered by a component" notice for it. That warning is about
+            scripts meant to *execute*; this one is inert JSON read by
+            crawlers, so there's nothing to fix — it's expected noise from
+            following the framework's own guidance, not a bug. The `<`
+            escape below is the same doc's recommended XSS hardening. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+        />
         <div className="grain-overlay" aria-hidden="true" />
         {/* Dark is the primary/default theme (UI-OVERHAUL-V4 §2) — a new
             visitor sees dark regardless of OS preference; the toggle still
@@ -82,6 +95,7 @@ export default async function LocaleLayout({
                   <main id="main">{children}</main>
                   <Footer locale={l} />
                   <SplashScreen site={site} />
+                  <CameraMoveSections />
                 </SmoothScroll>
               </NextIntlClientProvider>
             </ViewTransitionsProvider>

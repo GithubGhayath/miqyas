@@ -1,58 +1,45 @@
 # DECISIONS.md
 
-## Session checkpoint — paused mid-UI-OVERHAUL-V4, resume here
+## Session checkpoint — bug-fix pass, team redesign, static export for GitHub Pages
 
-Work stopped mid-pass at the user's request ("save your progress, we will complete the other time"), not
-at a natural end point. State of play, so a future session can pick this up without re-deriving it:
+Three rounds of user-reported feedback after the UI-OVERHAUL-V4 pass below, plus prepping the repo to ship.
+In order:
 
-**Done and verified working (build + lint clean, checked live in-browser):**
-- Full "Signal" colour system (§3) — dark-by-default, `.light` override, old `--paper`/`--blueprint`/
-  `--dawn`/`--patina` tokens fully retired and renamed everywhere.
-- `.bleed`/`.frame` layout primitives (§4), `PageShell` rebuilt on `.frame`, oversized `--step-6`/`--step-7`
-  type tokens in place and used (home hero, home closing statement, Work index rows).
-- GSAP + Lenis wired globally (`SmoothScroll.tsx`), `KineticHeading` (SplitText reveal, §5.3) applied to
-  every page's `<h1>` and to the home page's `<h2>`s.
-- Splash screen (`SplashScreen.tsx`, §6) — real-progress tracking, min/max guardrails, session-skip,
-  reduced-motion variant, ignition completion flash. Built and compiling; **not yet watched end-to-end live**
-  (only confirmed it doesn't crash the app and the rest of the page renders under it).
-- Spotlight Roster (`SpotlightMember.tsx`, §7) replacing the old team-card grid — cursor-spotlight mask,
-  touch sweep, keyboard-focus reveal. Confirmed rendering correctly (duotone tint visible, portraits present,
-  title-block-style name/role/contribution content all in the DOM).
-- Work index rebuilt as full-bleed scroll-snap rows (`WorkIndexRow.tsx`, §8) — **just fixed a real bug**
-  before pausing: the cover image was collapsing to ~1.6×1.6px because it was built on top of `MediaFigure`,
-  whose container hard-codes the `relative` Tailwind class; passing `absolute` alongside it does **not**
-  override `relative`, because Tailwind emits `.relative{}` after `.absolute{}` in this build's compiled
-  CSS, so `.relative` wins the cascade regardless of which one a caller intends to win. Fixed by not routing
-  full-bleed background images through `MediaFigure` at all (it renders a `<figure>` with no explicit
-  height, which was the other half of the collapse) — `WorkIndexRow` now renders `next/image` directly.
-  **Rebuilt and re-verified visually after the fix — confirmed correct in the browser.**
-- Copy pass (§10) — the three exact worked examples applied in both locales, changelog written to
-  `COPY-AUDIT.md`.
+1. Splash screen inconsistent on refresh; camera-move effect hiding text in dark mode and on the Services
+   page; content reading narrow on wide screens — see decisions 29–31.
+2. The camera-move effect still not settling before content is read on some pages; team cards asked to be
+   redesigned; splash transition asked to be smoother — see decisions 32–34.
+3. A real hydration-mismatch console error, a `<script>` console notice (not a bug — Next's own documented
+   JSON-LD pattern), a full mobile/RTL pass that found and fixed two more real defects, and converting the
+   app to a static export for GitHub Pages — see decisions 35–39 and the new `.github/workflows/deploy.yml`.
 
-**Confirmed NOT a bug, just a tooling quirk (documented so it isn't re-investigated from scratch):**
-`getComputedStyle(el).filter` and, separately, page screenshots in this session's browser-automation tool
-have repeatedly returned stale/incorrect results for elements using `filter`/`mask-image`/blend-mode
-effects specifically — confirmed by injecting a plain fixed-position red test box that also failed to
-appear in a screenshot where the real page content was independently verified correct via DOM inspection.
-Trust `elementFromPoint`, computed layout rects, `naturalWidth`, and — best of all — an actual fresh-tab
-screenshot taken *before* any scrolling, over a screenshot taken deep into a scrolled/interacted session.
+**Two real, previously-undetected defects found during the mobile pass, both severe enough that they're
+worth flagging up here rather than leaving buried in decision 38:**
+- `max-w-xs` on the mobile nav drawer was silently resolving to `0.75rem` (12px), not Tailwind's built-in
+  20rem, because this project's own `--spacing-xs` theme token happens to share the name Tailwind's default
+  max-width scale uses for `xs`.
+- The mobile nav's `fixed inset-0` overlay+drawer, nested inside `<header>`, was being clipped to the
+  header's own ~80px height instead of spanning the viewport — `header`'s `backdrop-blur-sm` establishes a
+  new containing block for `position: fixed` descendants (same rule as `filter`), so anything `fixed` inside
+  a backdrop-blurred ancestor is positioned relative to *that ancestor*, not the viewport.
 
-**Explicitly not started yet:**
-- §5.4 section-to-section scroll-scrubbed "camera move" timelines (dim-outgoing/brighten-incoming) — not
-  implemented anywhere.
-- §5.5's DrawSVG treatment for the hero pin connectors (currently still the plain scaleX line-draw from the
-  earlier motion pass, not DrawSVGPlugin) and Flip for state changes — not implemented.
-- §5.5 magnetic CTA / micro-tilt exist from the *previous* (UI-REFACTOR-PROMPT) pass on the home hero, not
-  re-verified against the new Signal palette/layout, and not extended anywhere new.
-- §8's `ScrollTrigger.batch()` reveal on the equipment-register table rows inside a Work detail page.
-- The full §11 QA checklist has not been run as a formal pass — only ad hoc spot checks during this session
-  (build, lint, and the live-browser checks logged above). No throttled-performance numbers have been
-  recorded. `QA-REPORT.md` has not yet been written/updated for this v4 pass.
-- Deliverable §12 items 9 (this file, in progress) and 10 (`QA-REPORT.md`) are incomplete.
+## Session checkpoint — UI-OVERHAUL-V4 pass completed
 
-**To resume:** re-run `npm run build` first to confirm nothing regressed since this checkpoint, then work
-through the "explicitly not started yet" list above in order, finishing with the full §11 QA pass and
-`QA-REPORT.md`.
+The prior checkpoint ("paused mid-UI-OVERHAUL-V4, resume here") was resumed and the pass finished. Kept
+below for history; the "explicitly not started yet" list it ended on is now entirely done — see decisions
+21–27 and `QA-REPORT.md` for what each item turned into and how it was verified. Summary of the resumed
+work:
+
+- §5.4 camera-move section transitions: implemented site-wide (decision 21).
+- §5.5 DrawSVG hero pin connectors: implemented (decision 22).
+- §5.5 Flip for a state change: implemented on the condition-scale grade selector (decision 23).
+- §5.5 magnetic CTA / hero tilt: re-checked against the Signal palette — no changes needed, both are
+  palette-agnostic (decision 24).
+- §8 `ScrollTrigger.batch()` on the equipment-register table: implemented (decision 25).
+- §11 QA pass: run; two real, previously-undetected defects found and fixed (decision 26); results and
+  honest gaps written to `QA-REPORT.md`.
+- A new browser-automation tooling caveat discovered while running the QA pass, distinct from the filter/
+  `getComputedStyle` one below (decision 27).
 
 Every place the build prompt said "you decide," recorded here with the reasoning.
 
@@ -197,3 +184,273 @@ Every place the build prompt said "you decide," recorded here with the reasoning
     by screenshot, the same way the AnimatePresence defect above was confirmed by DOM inspection rather
     than by screenshot. Different properties, different unreliable tool — check each kind of claim against
     the method that actually verifies it.
+
+---
+
+## UI-OVERHAUL-V4 pass, resumed — remaining items from the checkpoint
+
+21. **Camera-move section transitions (§5.4) are implemented as one layout-mounted component
+    (`CameraMoveSections.tsx`), not per-page.** It mounts once in `[locale]/layout.tsx`, re-scans
+    `#main`'s `<section>` elements on every route change (keyed off `usePathname()`), and wires a
+    scroll-scrubbed `gsap.timeline` between every consecutive pair exactly per the spec's worked example
+    (outgoing `scale: 0.96, filter: brightness(0.6)`, incoming `.from({yPercent: 8, filter: brightness(0.5)})`,
+    `scrub: 0.6`). A single sitewide component was chosen over duplicating the wiring on every page — every
+    page already reliably wraps its content in `<section>` elements, so scanning `#main` generically covers
+    all of them for free and guarantees no page is accidentally skipped.
+
+22. **The hero's pin connectors (§5.5) now render as real SVG `<line>` elements animated with
+    `DrawSVGPlugin`, replacing the CSS-`scaleX` `<m.span>` from the earlier motion pass.** The overlay SVG's
+    `viewBox` is deliberately set to `800×500` — the same aspect ratio as the hero's `aspect-[8/5]` container
+    — so `preserveAspectRatio="none"` stretches it with zero distortion (a non-matching aspect ratio would
+    have skewed the connector angles). RTL is handled by converting each pin's logical `xPct` to a physical
+    x-coordinate (`dir === 'rtl' ? 100 - xPct : xPct`) before projecting into viewBox units, then applying
+    the existing `useDirection().sign` to the connector's draw direction — the same sign convention already
+    used elsewhere in this codebase for direction-aware transforms. Verified correct in both directions by
+    screenshot (connectors point toward the button in the reading-forward direction in both LTR and RTL).
+
+23. **Flip (§5.5 "for state changes") is applied to the condition-scale grade selector, not somewhere new.**
+    The five grade buttons previously swapped an instant `bg-ember` class per-button on selection, which is
+    exactly the kind of plain-class-swap the spec calls out. Replaced with a single shared highlight `<div>`
+    positioned via measured `getBoundingClientRect()` deltas; on selection change, `Flip.getState()` captures
+    the highlight's old box before it's repositioned, then `Flip.from()` animates the visual transform back
+    to zero. A real bug was caught and fixed while building this: the mount-only resize listener closed over
+    the *initial* `selected` value (`useLayoutEffect(..., [])`), so a browser resize after changing grades
+    would have silently snapped the highlight back to grade 3 regardless of the actual selection — fixed by
+    reading the current selection through a ref (`selectedRef`, kept current via a plain `useLayoutEffect`
+    with no dependency array) instead of the effect's original closure.
+
+24. **Magnetic CTA (`MagneticButton.tsx`) and the hero micro-tilt (`SurveyHero.tsx`'s `tiltRef`) needed no
+    changes for the Signal palette re-check.** Both are purely structural/behavioural (pointer-offset state,
+    `rotateX`/`rotateY` transforms) and carry no hardcoded colour of their own — `MagneticButton` just wraps
+    whatever `Button` renders, and `Button`'s `primary`/`secondary` variants already read `bg-ember`/
+    `text-signal-text` etc. Confirmed via code read rather than a palette-diff, since there was nothing here
+    that could have drifted.
+
+25. **The equipment-register table's row reveal (§5.6/§8) uses `ScrollTrigger.batch()` via a new
+    `BatchRevealRows.tsx` client component wrapping `<tbody>`,** rather than converting the whole
+    (server-rendered) case-study page to a client component. The page keeps mapping `caseStudy.equipment`
+    to plain `<tr>` JSX exactly as before; only the `<tbody>` tag itself is swapped for the wrapper, which
+    measures its own `<tr>` children after mount and batches their entrance instead of creating one
+    `ScrollTrigger` per row.
+
+26. **Two real, previously-undetected defects were found and fixed during the §11 QA pass** (not
+    "you decide" calls — regressions from the palette rewrite that predate this resumed session):
+    - `GradeChip.tsx` was still reading `--color-grade-1-ink` … `--color-grade-5-ink` (decision 18's
+      per-grade contrast lookup from the *earlier* UI-REFACTOR-PROMPT pass). UI-OVERHAUL-V4 §3.3 replaced
+      that lookup with a single uniform token, `--color-grade-chip-text`, and the per-grade `-ink` variables
+      were removed from `globals.css` when that palette was written — but `GradeChip.tsx` itself was never
+      updated to match, so every grade-chip numeral was rendering with an undefined CSS custom property
+      (`var(--grade-ink)` resolving to nothing, falling through to an inherited colour rather than the
+      mandated fixed numeral colour). Fixed by pointing `--grade-ink` at `--color-grade-chip-text` and
+      deleting the stale per-grade lookup table. Confirmed fixed via `getComputedStyle`: `rgb(10, 12, 15)`
+      (`#0A0C0F`) on every grade in dark theme, `rgb(255, 255, 255)` in light theme — exactly §3.3's rule.
+    - The site's one ignition duration/ease pair (§5.5) was only ever a JS constant
+      (`src/lib/ignition.ts`), so the two CSS-only places an ignition moment happens — the primary CTA's
+      hover (`Button.tsx`) and the splash screen's completion-flash stroke/aperture transitions
+      (`SplashScreen.tsx`, both plain inline `style.transition` strings) — had silently drifted to a
+      hardcoded `120ms`/`200ms ease` instead of literally reusing it, which is exactly what §5.5 says not to
+      do ("do not re-author four slightly different versions of 'something switching on'"). Fixed by adding
+      `--duration-ignition: 200ms` and `--ease-ignition: cubic-bezier(0.25, 0.46, 0.45, 0.94)` (the standard
+      `easeOutQuad` curve — the closest CSS `cubic-bezier` equivalent to GSAP's `power2.out`, which CSS has
+      no native keyword for) to `globals.css`, and pointing all three CSS-only spots at them. The JS
+      constants in `ignition.ts` are the source of truth; the CSS custom properties are a hand-kept mirror
+      of the same two numbers, documented as such in a comment at the definition site, since Tailwind
+      arbitrary values and inline `style` strings can't import a JS module.
+
+27. **Three pages (Work detail, Notes detail) had their hero cover image pulled out of `PageShell` into a
+    `.bleed` wrapper; three pages (Services, Method, Contact) were left untouched despite failing the same
+    §11 checklist item.** The QA pass found that Services, Method, Contact, Notes index, Notes detail, and
+    Work detail were *entirely* wrapped in one `PageShell` — 100% `.frame` content, not "roughly a third"
+    per §11's threshold. Work detail and Notes detail both already had a natural, existing image (the case
+    study cover / the note's cover) that could be promoted to full-bleed without inventing new content, so
+    they were restructured: header/title content stays in a `PageShell`, the cover image sits in its own
+    `.bleed` wrapper between two `PageShell`s, body content resumes inside `.frame`. (Work detail's cover
+    already carried a `viewTransitionName` shared with the full-bleed image on the Work index row — bleeding
+    it here also fixes a minor continuity issue where the shared-element transition used to shrink straight
+    from full-bleed into a contained figure.) Services, Method, and Contact have no equivalent existing
+    image or natural full-bleed moment — manufacturing one (a stock photo band, an invented full-width
+    stat) would be decoration added to satisfy a checklist rather than structure carrying information, which
+    the original README.md spec explicitly argues against. Left as a known, honestly-documented gap rather
+    than a forced fix; see `QA-REPORT.md`.
+
+28. **A new browser-automation tooling caveat, distinct from the filter/`getComputedStyle` one above.** In
+    this environment, when the Browser pane tool reports itself hidden or minimized (`tabs_context` prints
+    "The Browser pane is currently hidden"; `window.innerWidth` reads `0`; screenshots time out with
+    "Claude's window is minimized or hidden"), `requestAnimationFrame` genuinely stops firing — confirmed
+    by injecting a self-scheduling `requestAnimationFrame` counter and observing it stay at `0` after
+    several real seconds. Every GSAP tween that depends on the ticker (Flip, `gsap.to`/`gsap.from`,
+    `quickTo`) freezes at its very first frame — typically the *inverted*/"from" state — for as long as the
+    pane stays hidden, then resumes and completes normally once it's visible again. This is **not** the same
+    failure mode as the filter/`getComputedStyle` issue and doesn't affect **scroll-event-driven** updates
+    (`ScrollTrigger`'s progress recalculation fires directly off the native `scroll` event, not off the
+    ticker, so camera-move and batch-reveal triggers fire correctly regardless of pane visibility — only the
+    *tween playback* after a trigger fires needs the ticker). When a tween looks "stuck," check
+    `tabs_context` for pane visibility before assuming the code is broken; when the pane won't come forward,
+    verify via DOM state instead of a live-animated screenshot — e.g. for Flip, confirm `Flip.getState()`
+    captured the correct old box and that the inverted starting transform's pixel delta exactly matches the
+    old-to-new position difference, which proves the setup is correct independent of whether the tween can
+    be watched playing out in this tool.
+
+---
+
+## Bug-fix pass 1 — splash refresh, dark-mode camera-move, page width
+
+29. **The splash's `sessionStorage` "already played" flag was removed outright, rather than fixed.** It was
+    causing exactly the reported bug: `sessionStorage` survives a hard refresh in the same tab (it's only
+    cleared when the tab closes), but the spec wants the splash to *replay* on a hard refresh and skip only
+    on an internal client-side navigation. Those two cases turned out to need no flag to distinguish at all:
+    `SplashScreen` mounts inside `[locale]/layout.tsx`, and Next.js already keeps a layout mounted across
+    client-side navigation within the same route tree — so the component's effect (and thus the splash)
+    structurally never re-runs on an internal `<Link>` navigation, regardless of any stored flag. It only
+    ever mounts fresh on a genuine full page load, which is exactly when the splash should play.
+
+30. **The camera-move dim/fade (§5.4) switched from `filter: brightness()` to `opacity`.** Reported as
+    "hides content in dark mode": `brightness()` scales every RGB channel toward zero, so on the dark
+    theme's near-black background it darkens light text almost as fast as the background, collapsing
+    contrast — light mode has more headroom (dimming a light background is far more forgiving) so it wasn't
+    as visible there. `opacity` blends toward the page's actual background colour instead, which holds up
+    in both themes. Also made the effect more pronounced per the same feedback ("I like it, make it appear
+    more") — scale delta widened from 0.96/8% to 0.9/14%, opacity dips to 0.35/0.15 instead of a gentler
+    range — since the dark-mode contrast problem, not the effect's intensity, was the actual complaint.
+
+31. **`.frame`'s max-width raised from 1680px to 2400px, and its default child span widened from
+    `grid-column: 2 / 16` to the full `1 / 17`.** Reported as content still reading narrow. Two compounding
+    causes: the 1680px cap itself, and every direct `.frame` child being inset by one extra grid column on
+    each side by default — which duplicated the inset `padding-inline` already provides, on top of an
+    already-capped container. `.frame-prose`/`.frame-facts`'s intentional asymmetric spans (`ReportSpread`'s
+    facts/prose split) are unaffected — they're separate classes with equal selector specificity, resolved
+    by simply being declared later in the stylesheet, unrelated to what the *default* span resolves to.
+
+---
+
+## Bug-fix pass 2 — short sections, team card redesign, splash smoothness
+
+32. **The camera-move fade-in's resolve point moved from the incoming section's own `top top` to `top
+    60%`.** Reported as unclear text while scrolling, worst on Services. The original span (`top bottom` →
+    `top top`) is exactly one viewport height of scroll, regardless of how tall the section actually is.
+    Services' sections are *shorter* than a viewport (~550px measured live), so the entrance's resolve point
+    (when its top reaches the viewport's top) could arrive well after the section had already scrolled
+    mostly past — meaning progress might never even reach 1 before the reader's eye got there. Resolving
+    within the first ~40% of the entrance instead means it settles to full opacity while the section is
+    still comfortably below the fold, confirmed live: a short section sat at ~93% opacity by the time it
+    reached a natural reading position, instead of still ramping.
+
+33. **The team section (`SpotlightMember.tsx`, the full-bleed cursor-spotlight cinematic treatment) was
+    replaced with a new `TeamCard`/`TeamPortrait` grid**, per an explicit request for a "more creative,
+    prettier" layout with new animation, rather than iterating on the existing one. Each card keeps the same
+    underlying idiom (duotone at rest, a cursor-tracked radial mask resolving to colour, full reveal on
+    keyboard focus) but scoped to one portrait instead of a full-bleed section, plus two new touches: a
+    `perspective`/`rotateX`/`rotateY` tilt toward the cursor (the same `gsap.quickTo` inertia pattern as the
+    mask, a second pair of quickTo functions rather than reusing the mask's), and a small corner-bracket +
+    growing-underline accent on hover/focus (a viewfinder/technical-drawing register mark, not a decorative
+    glow — kept in the site's existing engineering-document visual language rather than introducing a new
+    one). The grid's scroll-entrance stagger uses a new, generic `BatchRevealGrid` (a `<div>`-based sibling
+    of the existing table-only `BatchRevealRows`) rather than one-off wiring, since nothing about staggering
+    a grid of cards is table-specific. The dead `.team-trace` CSS (a hairline motif left over from an even
+    earlier, pre-Spotlight-Roster card-grid design, never removed when that pass replaced it) was revived
+    as the new grid's background trace rather than writing an equivalent rule from scratch.
+
+    A real, unrelated CSS bug was caught while building this: `.team-portrait__corner`'s colour was set via
+    a separate `border-color: var(--color-signal)` declaration, then each corner's `border-block-start: 2px
+    solid` / `border-inline-start: 2px solid` shorthand (declared after it, with no colour term) silently
+    reset that side's colour back to `currentcolor` — a border shorthand always sets its colour sub-property
+    even when omitted from the shorthand text, so a *separate* `border-color` line earlier in the same rule
+    never wins. Fixed by putting the colour inside each shorthand directly
+    (`border-block-start: 2px solid var(--color-signal)`), confirmed via `getComputedStyle` before and after.
+
+34. **The splash's exit crossfade and internal progress easing were changed, not just to a longer
+    duration.** Reported as wanting the splash and its transition into the page "smoother." Two real
+    contributing issues, not just taste: the aperture's SVG `r` attribute had a CSS `transition` layered on
+    top of a value that was *already* updating every frame from a GSAP-tweened `percent` state — animating
+    an already-smoothly-interpolating value a second time reads as laggy/rubber-banding rather than smooth,
+    so that transition was removed outright (kept only on the completion-flash's `stroke` colour swap, a
+    genuinely discrete change that benefits from one). Separately, the exit crossfade used a flat CSS `ease`
+    over 500ms; changed to the site's existing `--ease-standard` token (already used for every other
+    reveal/dissolve moment sitewide) paired with a subtle `scale(1.03)`, at 650ms — a named constant
+    (`HIDE_TRANSITION_MS`) shared between the CSS transition string and the `setTimeout` that unmounts the
+    component after it, since those two numbers silently drifting apart would cut the fade off mid-flight.
+
+---
+
+## Bug-fix pass 3 — hydration mismatch, mobile/RTL pass, static export for GitHub Pages
+
+35. **`CameraMoveSections`, `BatchRevealRows`, and `BatchRevealGrid` all defer their first DOM mutation by
+    one `requestAnimationFrame`, rather than mutating synchronously the instant their effect fires.** Fixes
+    a real console error: "A tree hydrated but some attributes of the server rendered HTML didn't match the
+    client properties," naming the exact `style` attributes (`will-change`, `opacity`, `transform`) these
+    three components write imperatively via refs. All three effects run correctly *after* React's hydration
+    commit (they're the last things mounted in the tree, and `useEffect` never runs before the browser has
+    already committed and painted), so this isn't a real mismatch between server and client output — it's
+    Next/React's dev-mode hydration-mismatch check evidently sampling DOM state at a point that can still
+    catch an imperative mutation from an effect that fired extremely early in the same task. This is a
+    known, common class of false-positive for third-party DOM-mutating libraries (GSAP included) used
+    inside React effects; deferring the mutation one frame is the standard, low-risk fix — it doesn't change
+    *what* gets mutated, only pushes *when* by one paint, safely past whatever window that check runs in.
+
+36. **The JSON-LD `<script type="application/ld+json">` in `[locale]/layout.tsx` was left as-is** (only
+    hardening it with the docs' own recommended `<`-escaping, which hadn't been applied) rather than
+    "fixing" the console notice about it. Confirmed via this exact Next.js version's own bundled docs
+    (`node_modules/next/dist/docs/01-app/02-guides/json-ld.md`) that a native `<script>` tag — not
+    `next/script` — is Next's own current, explicit recommendation for JSON-LD specifically, precisely
+    because `next/script` is for executable code and this isn't any. React's dev console still logs a
+    generic "script tag rendered by a component" notice for it regardless, because that check doesn't
+    special-case `type="application/ld+json"` — but there's no alternative in Next's own guidance that
+    avoids it, so this is expected, harmless noise from following the framework's documented pattern, not a
+    defect to route around.
+
+37. **Two real defects found during a full mobile/RTL pass — see the checkpoint summary at the top of this
+    file for both; not re-explained here to avoid duplicating it.** Fixed in `MobileNav.tsx` (portal to
+    `document.body` for the `backdrop-blur` containing-block bug; `max-w-[20rem]` instead of `max-w-xs` for
+    the theme-token collision).
+
+38. **Switched to a static export (`output: 'export'`) for GitHub Pages, per explicit user choice among
+    three deploy-target options offered (CI-only / GitHub Pages / Vercel-via-Action).** This is a real
+    architectural change, not a config toggle in isolation — proxy/middleware and dynamic route handlers are
+    both explicitly unsupported for static export (confirmed against this Next.js version's own bundled
+    `static-exports.md`), so:
+    - `src/proxy.ts` is deleted. Its one job — picking a locale for a bare `/` request via the
+      `Accept-Language` header — has no server-side equivalent without a server. Replaced with
+      `src/app/page.tsx`, a root page (a *sibling* of `[locale]`, so — per `app/layout.tsx`'s own comment —
+      it has to supply its own `<html>`/`<body>`, nothing upstream does it for this path) that does the
+      closest client-side equivalent: read `navigator.language` once on mount and `router.replace()` to
+      `/en` or `/ar`, plus a static `<meta http-equiv="refresh">` and a plain-link `<noscript>` fallback for
+      anyone who never gets that far. All paths in that fallback are relative (`ar/`, not `/ar/`) so it
+      still resolves correctly under a GitHub Pages *project* subpath, not just a domain root.
+    - `opengraph-image.tsx` gained `generateStaticParams` (required — without per-locale params and no
+      `dynamicParams` fallback, static export has nothing to prerender) and now always renders the English
+      name/tagline regardless of locale, rather than the real bug this exposed: Satori (the renderer behind
+      `ImageResponse`) has no Arabic text-shaping support without an embedded font covering it, and static
+      export previously never hit this because the route was generated lazily, on request, in dev/SSR —
+      switching to `output: 'export'` forces every locale variant to render at *build* time, which crashed
+      on the `ar` variant (`lookupType: 5 - substFormat: 3 is not yet supported`, a Satori/OpenType
+      limitation). Fetching a real Arabic font at build time was deliberately rejected as the fix: it would
+      make a static export — which should build reproducibly offline — depend on a network call to Google
+      Fonts succeeding, turning a config change into a new source of CI flakiness. Keeping the social-preview
+      thumbnail in Latin script for both locales was judged the smaller cost; the actual page underneath is
+      unaffected and fully localized either way.
+    - `robots.ts` and `sitemap.ts` both gained `export const dynamic = 'force-static'` — required by static
+      export even though neither ever reads per-request data.
+    - `next.config.ts` gained `basePath` (read from a `NEXT_BASE_PATH` env var the deploy workflow sets,
+      empty in local dev so `next dev`/the local static-preview script are unaffected) and
+      `trailingSlash: true` (a route needs to be a real directory with an `index.html` — reached via
+      `/en/` — for a server-less static host to resolve it, not a sibling `en.html` file).
+    - `package.json`'s `start` script changed from `next start` (which does not work against an
+      `output: 'export'` build — there's no server-rendered output left for it to serve) to
+      `npx serve@latest out -l 3000`, a plain static file server pointed at the export's `out/` directory.
+      Verified end-to-end with `curl` after this change: `/`, `/en/`, `/ar/`, `/en/services/`,
+      `robots.txt`, and one `_next/static` JS asset all return 200, and the root page's meta-refresh points
+      at `ar/` (the configured `defaultLocale`).
+    - New `.github/workflows/deploy.yml`: a `build` job (install, lint, typecheck, build) runs on every push
+      and pull request to catch breakage without deploying anything; a `deploy` job runs only on a push to
+      `main`, computes the base path from the repository name (empty for a `<owner>.github.io` user/org
+      repo, `/<repo-name>` otherwise — computed in the workflow itself since the actual repository name
+      isn't known yet at the time this was written), rebuilds with that path baked in, adds a `.nojekyll`
+      file to the export (without it, GitHub Pages' Jekyll processing silently drops every
+      underscore-prefixed path, including the entire `_next/` assets directory), and publishes via
+      `actions/upload-pages-artifact` + `actions/deploy-pages`.
+
+39. **`src/lib/metadata.ts`'s `siteUrl` placeholder (`https://miqyas.example`) was left untouched.** It
+    feeds canonical URLs and the sitemap/robots output; correcting it needs the real domain the site will
+    actually launch on (or the GitHub Pages URL, if that's the permanent home), which isn't yet known and
+    isn't a technical blocker for the export/deploy pipeline itself — worth revisiting the moment a real
+    domain (or the confirmed permanent GitHub Pages URL) exists.
