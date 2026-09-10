@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -64,14 +64,19 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Setup Pages
+        # enablement: true asks the API to turn Pages on (with "GitHub
+        # Actions" as the source) if it isn't already — otherwise this step
+        # 404s on a repo where Pages has never been configured before.
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Determine base path
         id: basepath
