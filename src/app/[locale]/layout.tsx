@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import Script from 'next/script';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
@@ -70,8 +71,16 @@ export default async function LocaleLayout({
             to visible (see SplashScreen.tsx) so there is never a frame with
             neither the splash nor this skip in effect; this script's only
             job is to flip that default to hidden, before first paint,
-            when the visitor has already seen it this session. */}
-        <script
+            when the visitor has already seen it this session.
+            `next/script` with `strategy="beforeInteractive"` — not a plain
+            `<script>` tag — is Next's own sanctioned way to run genuinely
+            executable code before hydration (unlike the inert JSON-LD
+            below, which explicitly calls for a plain tag instead); it also
+            avoids React's generic "script tag rendered by a component"
+            dev-mode notice, which a plain tag here would otherwise trip. */}
+        <Script
+          id="splash-skip-check"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `try{if(document.cookie.indexOf('${SPLASH_COOKIE_NAME}=1')!==-1){document.documentElement.setAttribute('${SPLASH_SKIP_ATTR}','')}}catch(e){}`,
           }}

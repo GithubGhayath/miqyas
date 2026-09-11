@@ -99,8 +99,8 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
         <ul className="grid grid-cols-1 gap-[var(--spacing-m)] sm:grid-cols-2 lg:grid-cols-3" role="list">
           {nodes.map(({ member }) => (
             <li key={member.id} className="flex flex-col gap-[var(--spacing-2xs)] border border-border p-[var(--spacing-s)]">
-              <div className="relative h-16 w-16 overflow-hidden rounded-full border border-border">
-                <Image src={member.portrait.src} alt="" fill sizes="64px" className="object-cover" />
+              <div className="relative h-20 w-20 overflow-hidden rounded-full border border-border">
+                <Image src={member.portrait.src} alt="" fill sizes="80px" className="object-cover" />
               </div>
               <TitleBlock cells={[{ label: pick(member.role, locale), value: pick(member.name, locale) }]} />
               <p className="text-ink-2">{pick(member.contribution, locale)}</p>
@@ -113,7 +113,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
 
   return (
     <div className="frame">
-      <div className="assembly relative w-full" style={{ aspectRatio: '16 / 10', minBlockSize: '22rem' }}>
+      <div className="assembly relative w-full" style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}>
         <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {nodes.map(({ member, pos }) => {
             const active = activeId === member.id;
@@ -174,11 +174,17 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
               >
                 <div
                   className={`duotone duotone-fade relative overflow-hidden rounded-full border-2 border-void transition-[inline-size,block-size] duration-[var(--duration-ignition)] ${
-                    active ? 'is-revealed h-20 w-20' : 'h-12 w-12'
+                    active ? 'is-revealed h-28 w-28 md:h-44 md:w-44' : 'h-16 w-16 md:h-24 md:w-24'
                   }`}
                   style={{ transitionTimingFunction: 'var(--ease-ignition)' }}
                 >
-                  <Image src={member.portrait.src} alt="" fill sizes="80px" className="object-cover" />
+                  <Image
+                    src={member.portrait.src}
+                    alt=""
+                    fill
+                    sizes={active ? '(min-width: 768px) 176px, 112px' : '(min-width: 768px) 96px, 64px'}
+                    className="object-cover"
+                  />
                 </div>
                 <span className="pointer-events-none font-mono text-[length:var(--step--1)] text-ink-3">
                   {pick(member.name, locale)}
