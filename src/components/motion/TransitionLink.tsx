@@ -2,7 +2,7 @@
 
 import { useTransitionRouter } from 'next-view-transitions';
 import { useLocale } from 'next-intl';
-import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from 'react';
 
 export type RouteTransitionClass = 'nav-forward' | 'nav-back' | 'case-reveal';
 
@@ -11,27 +11,26 @@ const TRANSITION_CLASSES: RouteTransitionClass[] = ['nav-forward', 'nav-back', '
 /**
  * A locale-aware Link that drives a specific named View Transition (see the
  * `::view-transition-*` rules in globals.css) instead of the browser's
- * default cross-fade. UI-REFACTOR-PROMPT §3.1(b)/(d).
+ * default cross-fade. UI-REFACTOR-PROMPT §3.1(b)/(d). Forwards its ref to
+ * the underlying `<a>` — some callers (e.g. WorkCarriage) need a DOM
+ * reference for their own ScrollTrigger, not just navigation.
  */
-export function TransitionLink({
-  href,
-  transition,
-  children,
-  className,
-  onClick,
-  ...rest
-}: {
-  href: string;
-  transition: RouteTransitionClass;
-  children: ReactNode;
-  className?: string;
-} & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>) {
+export const TransitionLink = forwardRef<
+  HTMLAnchorElement,
+  {
+    href: string;
+    transition: RouteTransitionClass;
+    children: ReactNode;
+    className?: string;
+  } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
+>(function TransitionLink({ href, transition, children, className, onClick, ...rest }, ref) {
   const locale = useLocale();
   const router = useTransitionRouter();
   const localizedHref = `/${locale}${href}`;
 
   return (
     <a
+      ref={ref}
       href={localizedHref}
       className={className}
       onClick={(event) => {
@@ -50,4 +49,4 @@ export function TransitionLink({
       {children}
     </a>
   );
-}
+});

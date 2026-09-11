@@ -11,13 +11,11 @@ import { ReportFact, ReportSpread } from '@/components/layout/ReportSpread';
 import { TitleBlock } from '@/components/ui/TitleBlock';
 import { Prose } from '@/components/ui/Prose';
 import { DimensionRule } from '@/components/ui/DimensionRule';
-import { DataTable } from '@/components/ui/DataTable';
-import { GradeChip } from '@/components/ui/GradeChip';
 import { Measure } from '@/components/ui/Measure';
 import { MediaFigure } from '@/components/ui/MediaFigure';
 import { BeforeAfter } from '@/components/interactive/BeforeAfter';
 import { KineticHeading } from '@/components/motion/KineticHeading';
-import { BatchRevealRows } from '@/components/motion/BatchRevealRows';
+import { EquipmentSection } from '@/components/work/EquipmentSection';
 
 export async function generateStaticParams() {
   const caseStudies = await getCaseStudies();
@@ -85,6 +83,7 @@ export default async function CaseStudyPage({
           viewTransitionName={`case-${caseStudy.slug}`}
           containerClassName="letterbox"
           useIntrinsicAspectRatio={false}
+          sizes="100vw"
         />
       </div>
 
@@ -124,46 +123,7 @@ export default async function CaseStudyPage({
         <section>
           <h2 className="u-display text-[length:var(--step-2)] text-ink">{t('equipmentHeading')}</h2>
           <div className="mt-[var(--spacing-m)]">
-            <DataTable caption={t('equipmentHeading')}>
-              <thead>
-                <tr className="border-b border-border text-[length:var(--step--1)] text-ink-3">
-                  <th scope="col" className="p-[var(--spacing-s)] text-start">
-                    {l === 'ar' ? 'المعدّة' : 'Equipment'}
-                  </th>
-                  <th scope="col" className="p-[var(--spacing-s)] text-start">
-                    {l === 'ar' ? 'القدرة' : 'Rating'}
-                  </th>
-                  <th scope="col" className="p-[var(--spacing-s)] text-start">
-                    {l === 'ar' ? 'سنة التركيب' : 'Year installed'}
-                  </th>
-                  <th scope="col" className="p-[var(--spacing-s)] text-start">
-                    {l === 'ar' ? 'الحالة' : 'Condition'}
-                  </th>
-                  <th scope="col" className="p-[var(--spacing-s)] text-start">
-                    {l === 'ar' ? 'ملاحظة' : 'Note'}
-                  </th>
-                </tr>
-              </thead>
-              <BatchRevealRows>
-                {caseStudy.equipment.map((row) => (
-                  <tr key={row.id} className="border-b border-border last:border-b-0">
-                    <th scope="row" className="p-[var(--spacing-s)] text-start font-medium text-ink">
-                      {pick(row.name, l)}
-                    </th>
-                    <td className="p-[var(--spacing-s)] font-mono text-ink-2">
-                      {row.rating ? <Measure value={row.rating} /> : '—'}
-                    </td>
-                    <td className="p-[var(--spacing-s)] font-mono text-ink-2">
-                      {row.yearInstalled ? <Measure value={row.yearInstalled} /> : '—'}
-                    </td>
-                    <td className="p-[var(--spacing-s)]">
-                      <GradeChip grade={row.grade} />
-                    </td>
-                    <td className="p-[var(--spacing-s)] text-ink-2">{pick(row.note, l)}</td>
-                  </tr>
-                ))}
-              </BatchRevealRows>
-            </DataTable>
+            <EquipmentSection equipment={caseStudy.equipment} locale={l} heading={t('equipmentHeading')} />
           </div>
         </section>
 

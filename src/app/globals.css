@@ -181,6 +181,16 @@ html[lang="en"] body {
 
 /* 5 ── Component utilities */
 @layer components {
+  /* Paired with the blocking inline script in [locale]/layout.tsx
+     (FIX-AND-POLISH-V1 §1): if the visitor already saw the splash this
+     session, the script stamps this attribute on <html> before anything
+     paints, and this rule hides the splash instantly — no flash of it
+     appearing then disappearing, no gap where the real page is briefly
+     unmasked either. */
+  [data-splash-skip] .splash-screen {
+    display: none;
+  }
+
   .u-display {
     font-family: var(--font-display);
   }
@@ -291,6 +301,33 @@ html[lang="en"] body {
     font-size: var(--step--1);
     white-space: nowrap;
     padding-inline: var(--spacing-s);
+  }
+
+  /* RailSelect — FIX-AND-POLISH-V1 §4: the row of options sits *on* a
+     dimension-rule line; the active tick is an instrument marking that
+     travels along it (JS-positioned via `left`, animated with a slight
+     overshoot spring — see the component), not a soft sliding pill. */
+  .rail-select__line {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(var(--spacing-xs) + 5px);
+    block-size: 1px;
+    background: var(--color-border);
+  }
+  .rail-select__mark {
+    inline-size: 1px;
+    block-size: 10px;
+    background: var(--color-border);
+  }
+  .rail-select__active-tick {
+    position: absolute;
+    top: calc(var(--spacing-xs) + 5px);
+    inline-size: 10px;
+    block-size: 10px;
+    border-radius: 50%;
+    background: var(--color-signal);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
   }
 
   /* Title block — §7.2: a hairline-bordered strip of labelled cells,
@@ -498,93 +535,91 @@ html[lang="en"] body {
     opacity: 0;
   }
 
-  /* Team card corner brackets — a viewfinder/technical-drawing register
-     mark, not a decorative glow, drawn in on hover/focus of the portrait
-     it sits inside. Sized and positioned with plain physical corners
-     (top/bottom + left/right border sides) since a mirrored bracket reads
-     identically either direction — nothing here needs to flip for RTL. */
-  .team-portrait__corner {
-    position: absolute;
-    inline-size: 22px;
-    block-size: 22px;
-    opacity: 0;
-    transform: scale(0.7);
+  /* "The Assembly" — FIX-AND-POLISH-V1 §3.2. A shared-methodology hub with
+     a thin dimension-rule line radiating to each member; the line ignites
+     (the same ignition token used everywhere else on the site) when its
+     member is hovered/focused/tapped. */
+  .assembly-hub {
+    inline-size: 1.75em;
+    block-size: 1.75em;
+    border-radius: 50%;
+    background: var(--color-signal);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 4px var(--color-void);
+  }
+  .assembly-line {
+    stroke: var(--color-border);
+    stroke-width: 1;
     transition:
-      opacity 260ms var(--ease-standard),
-      transform 260ms var(--ease-standard);
+      stroke var(--duration-ignition) var(--ease-ignition),
+      stroke-width var(--duration-ignition) var(--ease-ignition);
+  }
+  .assembly-line--active {
+    stroke: var(--color-signal);
+    stroke-width: 2;
+  }
+  .assembly-node {
+    cursor: pointer;
+  }
+  .assembly-panel {
+    animation: assembly-panel-in var(--duration-ignition) var(--ease-ignition);
+  }
+  @keyframes assembly-panel-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Work conveyor — FIX-AND-POLISH-V1 §2.3. A carriage riding a literal
+     rail: `.conveyor__rail` is the continuous line the full length of the
+     track, `.carriage__rail-tick` drops each card down onto it. Both are
+     positioned against the same fixed carriage height (480px, desktop-only
+     so a fixed pixel value is fine — no need for a responsive calc). */
+  .conveyor__rail {
+    position: absolute;
+    top: calc(50% + 264px);
+    inset-inline: 0;
+    block-size: 1px;
+    background: var(--color-border);
+  }
+  .carriage__rail-tick {
+    position: absolute;
+    bottom: -24px;
+    inset-inline-start: 50%;
+    inline-size: 1px;
+    block-size: 24px;
+    background: var(--color-border);
+    transform: translateX(-50%);
+  }
+  .carriage__corner {
+    position: absolute;
+    inline-size: 16px;
+    block-size: 16px;
     pointer-events: none;
   }
-  .team-portrait:hover .team-portrait__corner,
-  .team-portrait:focus-within .team-portrait__corner {
-    opacity: 1;
-    transform: scale(1);
-  }
-  /* Colour goes inside each side's own shorthand, not a separate
-     `border-color` declaration above: a `border-*-start: <width> <style>`
-     shorthand with no colour term resets that side's colour to
-     `currentcolor` regardless of what an earlier `border-color` set. */
-  .team-portrait__corner--tl {
-    top: 12px;
-    inset-inline-start: 12px;
+  .carriage__corner--tl {
+    top: -1px;
+    inset-inline-start: -1px;
     border-block-start: 2px solid var(--color-signal);
     border-inline-start: 2px solid var(--color-signal);
   }
-  .team-portrait__corner--br {
-    bottom: 12px;
-    inset-inline-end: 12px;
+  .carriage__corner--br {
+    bottom: -1px;
+    inset-inline-end: -1px;
     border-block-end: 2px solid var(--color-signal);
     border-inline-end: 2px solid var(--color-signal);
   }
 
-  /* Team-card role accent — the same "something switching on" register as
-     the ignition tokens, scaled down to a hairline: grows in under the
-     role label when its sibling portrait is hovered/focused. */
-  .team-role-accent {
+  /* Exploded-view equipment diagram — FIX-AND-POLISH-V1 §2.3: the short
+     connector between a part, its grade chip, and its note. */
+  .exploded-row__line {
     display: inline-block;
-    inline-size: 28px;
-    block-size: 2px;
-    background: var(--color-signal);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--duration-ignition) var(--ease-ignition);
-  }
-  :dir(rtl) .team-role-accent {
-    transform-origin: right;
-  }
-  .team-portrait:hover ~ * .team-role-accent,
-  .team-portrait:focus-within ~ * .team-role-accent {
-    transform: scaleX(1);
-  }
-
-  /* Team layout trace — UI-REFACTOR-PROMPT §4.4: a single continuous hairline
-     running behind the cards, in the same quiet visual language as a wiring
-     schematic. Vertical on mobile (one column), horizontal on desktop. */
-  .team-trace {
-    position: relative;
-  }
-  .team-trace::before {
-    content: "";
-    position: absolute;
-    z-index: 0;
+    inline-size: 20px;
+    block-size: 1px;
     background: var(--color-border);
-    inset-inline-start: 50%;
-    top: 0;
-    bottom: 0;
-    inline-size: 1px;
-  }
-  @media (min-width: 48rem) {
-    .team-trace::before {
-      inset-inline-start: 0;
-      inset-inline-end: 0;
-      top: 45%;
-      bottom: auto;
-      inline-size: auto;
-      block-size: 1px;
-    }
-  }
-  .team-trace > * {
-    position: relative;
-    z-index: 1;
   }
 
   /* Work hero letterboxing — UI-REFACTOR-PROMPT §5.2. Desktop (≥1024px) only:

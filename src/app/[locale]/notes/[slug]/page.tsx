@@ -79,7 +79,13 @@ export default async function FieldNotePage({
           body text below stays measure-width for legibility, but the cover
           image is the page's one cinematic moment. */}
       <div className="bleed">
-        <MediaFigure image={note.cover} priority useIntrinsicAspectRatio={false} containerClassName="letterbox" />
+        <MediaFigure
+          image={note.cover}
+          priority
+          useIntrinsicAspectRatio={false}
+          containerClassName="letterbox"
+          sizes="100vw"
+        />
       </div>
 
       <PageShell>
@@ -90,7 +96,9 @@ export default async function FieldNotePage({
               return (
                 <div key={index} className="flex flex-col gap-[var(--spacing-m)]">
                   <p>{paragraph}</p>
-                  {figure ? <MediaFigure image={figure.image} caption={figure.caption} /> : null}
+                  {figure ? (
+                    <MediaFigure image={figure.image} caption={figure.caption} sizes="(min-width: 768px) 700px, 100vw" />
+                  ) : null}
                 </div>
               );
             })}

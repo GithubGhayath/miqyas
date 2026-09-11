@@ -454,3 +454,126 @@ Every place the build prompt said "you decide," recorded here with the reasoning
     actually launch on (or the GitHub Pages URL, if that's the permanent home), which isn't yet known and
     isn't a technical blocker for the export/deploy pipeline itself — worth revisiting the moment a real
     domain (or the confirmed permanent GitHub Pages URL) exists.
+
+---
+
+## FIX-AND-POLISH-V1 pass
+
+40. **The splash's flash-of-real-content bug (§1) was real and root-caused exactly as the spec predicted**:
+    `shouldRender` defaulted to `null`, rendering nothing on both the server HTML and the client's first
+    paint, only becoming `true` inside a `useEffect` — a render-and-then-reveal race, the textbook
+    "flash before hydration" failure Next's own guide describes. Fixed per the spec's Step 1 (default to
+    visible, full stop: `useState(true)`, no tri-state). Step 2's prescription (a cookie read via
+    `cookies()` in a Server Component) does not apply as written, though — this project is a full static
+    export (`output: 'export'`, no server, see decision #38) since the previous pass, so there is no
+    per-request server to read a cookie on. Adapted to the *category* of fix Step 3 describes instead: a
+    synchronous inline `<script>`, the very first thing in `<body>`, reads the same cookie client-side and
+    stamps `data-splash-skip` on `<html>` before anything else paints; a paired CSS rule
+    (`[data-splash-skip] .splash-screen { display: none }`) hides the splash instantly with no flash of it
+    appearing-then-disappearing either. `SplashScreen.tsx`'s own effect checks that same attribute to decide
+    whether to run the real progress/inert sequence at all, but never uses it to decide *initial* visibility
+    — that decision is made once, synchronously, before the component exists. Verified via the raw HTML
+    response (`curl`), not a live-browser timing race: the splash's `style="opacity:1;..."` is present in
+    the literal bytes Next serves, and the blocking script is confirmed to be the first executable content
+    in `<body>`.
+
+41. **The splash's session-skip mechanism is a real cookie (`miqyas_first_light`, 30-minute `max-age`), not
+    the removed `sessionStorage` reference from UI-OVERHAUL-V4 §6.3 — but not for the reason a hard refresh
+    used to matter.** An earlier pass (see the "UI-OVERHAUL-V4 pass, resumed" section above, decision-less
+    but documented inline in SplashScreen.tsx at the time) had deliberately *removed* any persisted flag,
+    reasoning that Next keeps the root layout mounted across internal navigation, so the component only
+    ever mounts on a genuine full load anyway — correct, but this spec explicitly wants a splash *not* to
+    replay on every hard refresh within the same browsing session, which that removal didn't provide. The
+    cookie now provides exactly that: shows on first visit, shows again after the cookie expires or the
+    browser session ends, does not replay on repeat refreshes inside the ~30-minute window. Confirmed live:
+    completing the splash sets the cookie; a subsequent hard reload correctly stamps `data-splash-skip`
+    before paint.
+
+42. **A real, previously-undetected bug was found and fixed while wiring `RailSelect` (§4) into all three
+    consumers**, not a "you decide" call: the shared panel's content swap (`displayedId`) was originally set
+    from inside a `.call()` step in the middle of a GSAP timeline, gated entirely behind that timeline
+    actually playing. Confirmed live that this leaves the panel permanently stuck on the *previous*
+    option's content — `aria-selected`/`aria-checked` update correctly and instantly, but the visible panel
+    does not — whenever the GSAP ticker doesn't get a tick soon after the click; a backgrounded/hidden
+    browser tab suspends `requestAnimationFrame` (and therefore GSAP's ticker) by design, so this was a
+    real, if narrow, correctness bug for an actual user (click a tick, immediately switch tabs, switch
+    back — stale content), not only a symptom of this session's testing tool. Fixed by decoupling
+    correctness from animation entirely: `displayedId` now updates synchronously in its own effect the
+    moment `activeId` changes, and a *second* effect (keyed on `displayedId`, so it only ever runs after the
+    content is already correct) applies a purely cosmetic GSAP entrance flourish on top. Re-verified live
+    after the fix, in both the method stepper and the mobile tier-compare switch, on fresh tabs: clicking a
+    tick now updates the visible panel text immediately, not just the ARIA state.
+
+43. **The exploded-view equipment diagram (§2.3) is switched with the same shared `RailSelect` used
+    elsewhere (§4), not a bespoke tab UI built just for this one case** — `EquipmentSection.tsx` wraps both
+    the existing table markup and the new `EquipmentExplodedView.tsx` as `RailSelect` panels. Mobile
+    (`<1024px`) skips the toggle entirely and always renders the plain table; the exploded-view layout
+    (parts cascading diagonally down the assembly axis) is a desktop drafting convention, not something
+    that degrades gracefully to a narrow column.
+
+44. **`TransitionLink` was converted to `forwardRef`** — a small, backward-compatible addition needed so
+    `WorkCarriage.tsx` could get a real DOM reference for its own touch-sweep `ScrollTrigger`, the same
+    mechanism `WorkIndexRow`'s mobile fallback already uses. Every existing caller is unaffected; the ref is
+    optional.
+
+45. **§8.1's "lead suspect" (missing `-webkit-mask-image` prefix) turned out to be moot by the time this
+    pass reached it**, not something that needed fixing: the only `mask-image` usage anywhere in the
+    codebase belonged to the old Spotlight Roster's cursor-tracked reveal (`SpotlightMember`/`TeamPortrait`),
+    which this same pass's §3.2 redesign ("The Assembly") removed entirely in favour of the
+    `.duotone`/`.duotone-fade` class-based grayscale-plus-blend-mode mechanic — which never depended on
+    `mask-image` at all. Confirmed via a full-codebase grep after the redesign landed: zero remaining
+    `mask-image`/`maskImage` occurrences. The rest of §8.1's checklist was still worked through and found
+    several real, independent `sizes`-attribute mismatches (decision #46).
+
+46. **Several `next/image` `sizes` attributes were wrong relative to their actual rendered width, found
+    during the §8.1 audit** — each was requesting roughly half (or, for one, double) the resolution the
+    image actually needed at its real display size, which under-fetches and shows a visibly softer image on
+    larger screens (over-fetches are wasteful but not visibly broken, so the under-fetching cases were the
+    real defects): the notes-detail and work-detail full-bleed covers (`sizes` defaulted to
+    `MediaFigure`'s generic `50vw` fallback despite sitting in a `.bleed` — should be `100vw`), the inline
+    figure inside a note's body copy and the condition-scale explorer's `MediaFigure` (both also inherited
+    the same `50vw` default despite being narrower, fixed-ish columns, not half the viewport), and
+    `WorkCarriage`'s cover image (hardcoded `80vw`, but the carriage itself is a fixed `26rem`/416px card,
+    not a viewport-relative one — desktop-only, so a fixed `416px` value is accurate rather than a guess).
+
+47. **The theme toggle's aperture (§6) reuses the shared ignition duration/ease token for its completion
+    snap and adds a brightness-flash "glow," but does not literally share DOM/CSS with the splash or team
+    assembly apertures.** A real DOM overlay cannot render on top of the `::view-transition-new(root)`
+    pseudo-element driving the reveal — the View Transition tree paints in the browser's top layer, above
+    all normal content regardless of z-index — so the splash/assembly's radial-gradient glow (a real
+    element) has no equivalent construction available here. The closest achievable match using only what a
+    view-transition pseudo-element can animate (`clip-path`, `filter`, `transform`, `opacity`) is a
+    `filter: brightness()` pulse confined to the ignition-duration tail of the reveal, layered as a second
+    WAAPI `animate()` call alongside the `clip-path` circle growth — implemented and documented as a
+    deliberate, technically-constrained adaptation rather than a literal reuse.
+
+48. **Six placeholder team members (M-01…M-06, §3.4) replace the previous three named ones.** The `name`
+    field now holds the reference code itself (`"M-01"`) rather than a separate code alongside an invented
+    personal name, since no real names exist yet — consistent with the brand's own `REF` convention used
+    elsewhere (case studies, equipment rows). Every `contribution` line is marked as a placeholder in a
+    code comment at the top of `team.ts`, per the spec's own instruction not to leave placeholder content
+    unmarked.
+
+49. **"The Assembly" (§3.2) falls back to a plain vertical list under reduced motion, not the interactive
+    scattered-node layout rendered statically with all six expanded at once** — a deliberate adaptation, not
+    a literal reading of "all six nodes render permanently expanded." The scattered coordinates were
+    designed assuming only one node is ever expanded (large portrait + callout) at a time; forcing all six
+    into that expanded state simultaneously at their original positions would produce serious visual overlap
+    between adjacent callouts, which is a worse reduced-motion experience than the spec's actual goal (every
+    member's information visible, nothing to trigger). A plain list satisfies that goal more legibly: no
+    lines to not-animate, no overlap, everything readable top to bottom.
+
+50. **This session's browser-automation testing tool exhibited the same "pane hidden" / zero-layout / rAF-
+    frozen behaviour documented in QA-REPORT.md and DECISIONS.md #28 from the previous pass, repeatedly**,
+    including two new symptoms worth recording for whoever continues this: (a) a tab that has been reused
+    across several `navigate`/click cycles can intermittently show Next's `loading.tsx` fallback
+    superimposed with stale content from a previous render (confirmed via `document.body.innerText`
+    containing both "Loading" and real page text simultaneously) — always resolved by testing on a freshly
+    created tab instead of reusing one; (b) with the pane hidden, `Element.focus()` can fail to update
+    `document.activeElement` at all (not just fail to trigger `:focus`/`:focus-within` CSS as observed
+    before), and `getBoundingClientRect()` on real, correctly-rendered elements can report all-zero
+    rects — both consistent with the pane's layout engine being fully suspended while hidden, not specific
+    to any one component. Every interactive behaviour in this pass that could not be confirmed live for
+    this reason (Team Assembly keyboard-focus reveal, specifically) was still verified structurally (DOM
+    node count, ARIA wiring, the exact same `onFocus`/`onBlur` idiom already proven working for the
+    predecessor component earlier in this project) and via code review, not left unverified.

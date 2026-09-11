@@ -7,6 +7,7 @@ import type { Locale, SiteConfig } from '@/content/types';
 import { pick } from '@/lib/pick';
 import { IGNITION_DURATION, respectsReducedMotion } from '@/lib/ignition';
 import { trackCriticalAssets } from '@/lib/loading-progress';
+import { SPLASH_COOKIE_MAX_AGE_S, SPLASH_COOKIE_NAME, SPLASH_SKIP_ATTR } from '@/lib/splash-cookie';
 import { Measure } from '@/components/ui/Measure';
 
 const MIN_DISPLAY_MS = 900;
@@ -23,9 +24,21 @@ function roundToStep(value: number): number {
  * first images) mounts and renders normally underneath this overlay the
  * entire time (§6.5) — this is a curtain over content that already exists,
  * not a theatrical delay in front of an empty page.
+ *
+ * `shouldRender` defaults to `true` — on both the server-rendered HTML and
+ * the client's first render, before any effect runs — so the splash is
+ * literally the first thing painted. The previous version defaulted this
+ * to an unknown/`null` state that rendered nothing until an effect flipped
+ * it, which let the real page flash unmasked for one frame first
+ * (FIX-AND-POLISH-V1 §1 — the exact "flash before hydration" failure mode
+ * Next's own guide describes). The "already saw it this session" skip is
+ * handled by a synchronous inline script in the root layout that stamps
+ * `data-splash-skip` on `<html>` *before* this component ever renders —
+ * this effect only needs to check that same attribute to decide whether to
+ * run the real sequence below, never to decide initial visibility.
  */
 export function SplashScreen({ site }: { site: SiteConfig }) {
-  const [shouldRender, setShouldRender] = useState<boolean | null>(null);
+  const [shouldRender, setShouldRender] = useState(true);
   const [hiding, setHiding] = useState(false);
   const [igniting, setIgniting] = useState(false);
   const [percent, setPercent] = useState(0);
@@ -35,18 +48,13 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
   const displayRef = useRef({ value: 0 });
 
   useEffect(() => {
-    // Whether the splash's motion is reduced depends on client-only state
-    // (a media query) that isn't known during SSR — an effect-driven render
-    // decision is the correct pattern here, not a workaround for one.
-    // No persisted "already played" flag: this component only ever mounts
-    // on a genuine full page load (Next.js keeps the root layout — and this
-    // component inside it — mounted across client-side navigation within
-    // the same session, so an internal Link click never re-runs this effect
-    // in the first place). A `sessionStorage` gate here would only ever
-    // suppress replays on a *hard refresh*, which the spec explicitly wants
-    // to still show — that mismatch was the reported bug.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setShouldRender(true);
+    if (document.documentElement.hasAttribute(SPLASH_SKIP_ATTR)) {
+      // The inline script already hid this instantly via CSS — nothing
+      // flashed. Just drop it from the DOM; no inert, no progress tracking.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShouldRender(false);
+      return;
+    }
 
     const main = document.getElementById('main');
     main?.setAttribute('inert', '');
@@ -94,6 +102,11 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
     function complete() {
       if (cancelled) return;
       setDisplayPercent(1);
+      try {
+        document.cookie = `${SPLASH_COOKIE_NAME}=1; path=/; max-age=${SPLASH_COOKIE_MAX_AGE_S}; samesite=lax`;
+      } catch {
+        /* cookies disabled — replay next load, harmless */
+      }
       main?.removeAttribute('inert');
       setIgniting(true);
       const flashDelay = reduceMotion ? 0 : IGNITION_DURATION * 1000 + 300;
@@ -112,7 +125,7 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
     };
   }, []);
 
-  if (shouldRender !== true) return null;
+  if (!shouldRender) return null;
 
   const announcedPercent = roundToStep(percent);
   const aperturePct = reduceMotion ? 100 : Math.min(100, percent);
@@ -120,7 +133,7 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
 
   return (
     <div
-      className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-void"
+      className="splash-screen fixed inset-0 z-[999] flex flex-col items-center justify-center bg-void"
       style={{
         opacity: hiding ? 0 : 1,
         transform: hiding ? 'scale(1.03)' : 'scale(1)',

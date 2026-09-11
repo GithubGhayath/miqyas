@@ -5,6 +5,7 @@ import { getCaseStudies } from '@/lib/content';
 import { buildMetadata } from '@/lib/metadata';
 import { KineticHeading } from '@/components/motion/KineticHeading';
 import { WorkIndexRow } from '@/components/work/WorkIndexRow';
+import { WorkConveyor } from '@/components/work/WorkConveyor';
 
 export async function generateMetadata({
   params,
@@ -33,9 +34,17 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
         </header>
       </div>
 
-      {/* Full-bleed, full-viewport-height "slides" — UI-OVERHAUL-V4 §8 —
-          not a grid of small cards. Gentle scroll-snap, not forced. */}
-      <div className="bleed" style={{ scrollSnapType: 'y proximity' }}>
+      {/* Desktop (≥1024px): the conveyor — FIX-AND-POLISH-V1 §2.3, a
+          horizontally-pinned rail of carriages, replacing the generic
+          cinematic vertical stack with something unmistakably mechanical.
+          Below 1024px the horizontal-pin mechanic fights native touch
+          scroll, so it isn't rendered at all there — a deliberate,
+          documented breakpoint behaviour, not a compromise. */}
+      <WorkConveyor caseStudies={caseStudies} locale={l} />
+
+      {/* Mobile (<1024px) fallback: the previous full-bleed, full-viewport
+          vertical stack, unchanged. */}
+      <div className="bleed lg:hidden" style={{ scrollSnapType: 'y proximity' }}>
         {caseStudies.map((caseStudy) => (
           <WorkIndexRow key={caseStudy.id} caseStudy={caseStudy} locale={l} />
         ))}

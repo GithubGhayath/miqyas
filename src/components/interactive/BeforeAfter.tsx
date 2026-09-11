@@ -73,14 +73,14 @@ export function BeforeAfter({ before, after }: { before: ImageRef; after: ImageR
       onPointerCancel={onPointerUp}
     >
       <div className="absolute inset-0 duotone">
-        <Image src={before.src} alt={t(before.alt)} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+        <Image src={before.src} alt={t(before.alt)} fill sizes="(min-width: 768px) 640px, 100vw" className="object-cover" />
         <div className="grain-local" aria-hidden="true" style={{ opacity: 0.05 }} />
         <span className="absolute bottom-[var(--spacing-2xs)] start-[var(--spacing-2xs)] bg-ink/70 px-[var(--spacing-2xs)] font-mono text-[length:var(--step--1)] text-void">
           {tBeforeAfter('before')}
         </span>
       </div>
       <div className="absolute inset-0" style={{ clipPath }}>
-        <Image src={after.src} alt={t(after.alt)} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+        <Image src={after.src} alt={t(after.alt)} fill sizes="(min-width: 768px) 640px, 100vw" className="object-cover" />
         <span className="absolute bottom-[var(--spacing-2xs)] end-[var(--spacing-2xs)] bg-ink/70 px-[var(--spacing-2xs)] font-mono text-[length:var(--step--1)] text-void">
           {tBeforeAfter('after')}
         </span>

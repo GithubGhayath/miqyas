@@ -12,8 +12,8 @@ export const assessmentTiers: AssessmentTierRow[] = [
     aspect: { ar: 'الحسابات', en: 'Calculations' },
     preliminary: { ar: 'لا حسابات هندسية', en: 'None' },
     full: {
-      ar: 'حسابات هندسية (مثل CEMA وDIN 22101 للناقلات)',
-      en: 'Engineering calculations (e.g. CEMA, DIN 22101 for conveyors)',
+      ar: 'حسابات هندسية (مثل سلسلة ISO 10816/20816 للمعدات الدوّارة)',
+      en: 'Engineering calculations (e.g. ISO 10816/20816 series for rotating equipment)',
     },
   },
   {

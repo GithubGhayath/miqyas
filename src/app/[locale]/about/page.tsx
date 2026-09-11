@@ -7,9 +7,8 @@ import { buildMetadata } from '@/lib/metadata';
 import { PageShell } from '@/components/layout/PageShell';
 import { DimensionRule } from '@/components/ui/DimensionRule';
 import { Accordion } from '@/components/ui/Accordion';
-import { TeamCard } from '@/components/about/TeamCard';
+import { TeamAssembly } from '@/components/about/TeamAssembly';
 import { KineticHeading } from '@/components/motion/KineticHeading';
-import { BatchRevealGrid } from '@/components/motion/BatchRevealGrid';
 
 export async function generateMetadata({
   params,
@@ -28,9 +27,12 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   const [t, team, faq] = await Promise.all([getTranslations('about'), getTeam(), getFaq()]);
 
+  // FIX-AND-POLISH-V1 §3.3 — this replaces (not paraphrases) the earlier
+  // opening, which incorrectly framed the team as mechanical-plus-software
+  // in a way that overstated how many people actually code.
   const principle = {
-    ar: 'نحن فريق هندسي صغير في دمشق. ما يجمعنا ليس حجم الخبرة بل تقاطع نادر: هندسة ميكانيكية تعرف ما تنظر إليه في الميدان، وبرمجة تحوّل ما رأته إلى ملف رقمي يقرؤه طرف ثالث في أي مكان. القيمة ليست في الوصول إلى المصنع — بل في ترجمة ما فيه إلى لغة قرار.',
-    en: 'We are a small engineering team in Damascus. What unites us is not years of experience but a rare intersection: mechanical engineering that knows what it is looking at in the field, and software that turns what it saw into a digital file a third party can read anywhere. The value is not in reaching the factory — it is in translating what is inside it into the language of a decision.',
+    ar: 'فريقنا مهندسون متخصصون في تصميم خطوط الإنتاج الميكانيكية، إلى جانب خبرة كهربائية داخل الفريق. الخيط الجديد الوحيد فيه هو قدرة برمجية تحوّل ما نراه في الميدان إلى ملف رقمي يقرؤه من لم يزر الموقع.',
+    en: 'Our team is mechanical design engineers specialised in production lines, with electrical engineering expertise alongside them. The one new thread running through it is a programming capability that turns what we see on site into a digital file for someone who was never there.',
   };
 
   return (
@@ -46,24 +48,20 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </header>
       </PageShell>
 
-      {/* Team grid — full-bleed band (every page needs a bleed moment,
-          §4.2), with the grid itself kept to the site's normal content
-          width inside it. Each portrait tilts toward the cursor and
-          resolves to colour under a cursor-tracked spotlight; the whole
-          grid rises in staggered as it scrolls into view. */}
-      <section className="bleed team-trace border-y border-border py-[var(--spacing-xl)]">
-        <div className="mx-auto max-w-[var(--spacing-page-max)] px-[var(--spacing-page-pad)]">
+      {/* "The Assembly" (FIX-AND-POLISH-V1 §3.2) — deliberately a `.frame`
+          composition, not `.bleed`: a parts-diagram benefits from defined
+          structure, not edge-to-edge bleed. This section trades away the
+          page's one bleed moment (§4.2) for that reason; About no longer
+          has one, which is an accepted, explicit trade-off of this
+          redesign rather than an oversight. */}
+      <section className="border-y border-border py-[var(--spacing-xl)]">
+        <div className="frame">
           <KineticHeading as="h2" className="u-display text-[length:var(--step-2)] text-ink">
             {t('teamHeading')}
           </KineticHeading>
-          <BatchRevealGrid
-            className="mt-[var(--spacing-m)] grid grid-cols-1 gap-x-[var(--spacing-l)] gap-y-[var(--spacing-2xl)] sm:grid-cols-2 lg:grid-cols-3"
-            rise={32}
-          >
-            {team.map((member) => (
-              <TeamCard key={member.id} member={member} locale={l} />
-            ))}
-          </BatchRevealGrid>
+        </div>
+        <div className="mt-[var(--spacing-m)]">
+          <TeamAssembly team={team} locale={l} />
         </div>
       </section>
 

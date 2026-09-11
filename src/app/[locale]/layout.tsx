@@ -8,6 +8,7 @@ import type { Locale } from '@/content/types';
 import { getSite } from '@/lib/content';
 import { pick } from '@/lib/pick';
 import { siteUrl } from '@/lib/metadata';
+import { SPLASH_COOKIE_NAME, SPLASH_SKIP_ATTR } from '@/lib/splash-cookie';
 import { displayAr, displayEn, mono, textAr, textEn } from '../fonts';
 import { MotionProvider } from '@/components/motion/MotionProvider';
 import { ViewTransitionsProvider } from '@/components/motion/ViewTransitionsProvider';
@@ -63,6 +64,18 @@ export default async function LocaleLayout({
       className={`${displayAr.variable} ${displayEn.variable} ${textAr.variable} ${textEn.variable} ${mono.variable}`}
     >
       <body>
+        {/* Blocking, synchronous, runs before anything below it paints —
+            the same category of fix next-themes uses for flash-of-wrong-
+            theme (FIX-AND-POLISH-V1 §1). The splash itself always defaults
+            to visible (see SplashScreen.tsx) so there is never a frame with
+            neither the splash nor this skip in effect; this script's only
+            job is to flip that default to hidden, before first paint,
+            when the visitor has already seen it this session. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(document.cookie.indexOf('${SPLASH_COOKIE_NAME}=1')!==-1){document.documentElement.setAttribute('${SPLASH_SKIP_ATTR}','')}}catch(e){}`,
+          }}
+        />
         {/* Next's own recommended JSON-LD pattern for the App Router (a
             native <script type="application/ld+json">, not next/script —
             see node_modules/next/dist/docs/01-app/02-guides/json-ld.md):
