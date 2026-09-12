@@ -577,12 +577,45 @@ html[lang="en"] body {
      a thin dimension-rule line radiating to each member; the line ignites
      (the same ignition token used everywhere else on the site) when its
      member is hovered/focused/tapped. */
+  /* A bounded sheet rather than a diagram floating in open space —
+     corner brackets matching .carriage__corner (Work conveyor) and a
+     faint measurement grid, so the empty canvas reads as "measured",
+     not accidental. */
+  .assembly--framed {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--color-border) 45%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-border) 45%, transparent) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center;
+  }
+  .assembly__corner {
+    position: absolute;
+    inline-size: 18px;
+    block-size: 18px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .assembly__corner--tl {
+    top: -1px;
+    inset-inline-start: -1px;
+    border-block-start: 2px solid var(--color-signal);
+    border-inline-start: 2px solid var(--color-signal);
+  }
+  .assembly__corner--br {
+    bottom: -1px;
+    inset-inline-end: -1px;
+    border-block-end: 2px solid var(--color-signal);
+    border-inline-end: 2px solid var(--color-signal);
+  }
   .assembly-hub {
-    inline-size: 1.75em;
-    block-size: 1.75em;
+    inline-size: 2.5em;
+    block-size: 2.5em;
     border-radius: 50%;
     background: var(--color-signal);
-    box-shadow: 0 0 0 4px var(--color-void);
+    box-shadow:
+      0 0 0 4px var(--color-void),
+      0 0 0 5px var(--color-border);
+    z-index: 1;
     /* Task 2.4 (creative-enhancement-pass) — a slow, barely-perceptible
        independent float, so the hub reads as sitting at a different depth
        than the flat plane of member nodes around it. cubic-bezier below
@@ -605,8 +638,8 @@ html[lang="en"] body {
     }
   }
   .assembly-line {
-    stroke: var(--color-border);
-    stroke-width: 1;
+    stroke: var(--color-ink-3);
+    stroke-width: 1.25;
     transition:
       stroke var(--duration-ignition) var(--ease-ignition),
       stroke-width var(--duration-ignition) var(--ease-ignition);

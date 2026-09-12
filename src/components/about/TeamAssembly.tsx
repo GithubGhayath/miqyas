@@ -4,11 +4,10 @@ import Image from 'next/image';
 import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { m } from 'motion/react';
-import gsap from 'gsap';
 import type { Locale, TeamMember } from '@/content/types';
 import { pick } from '@/lib/pick';
 import { useDirection } from '@/hooks/useDirection';
-import { IGNITION_DURATION, IGNITION_EASE, respectsReducedMotion } from '@/lib/ignition';
+import { respectsReducedMotion } from '@/lib/ignition';
 import { springSnappy } from '@/lib/motion';
 import { TitleBlock } from '@/components/ui/TitleBlock';
 
@@ -48,19 +47,6 @@ const POSITIONS: { x: number; y: number }[] = [
   { x: 10, y: 20 },
 ];
 
-// Task 2.1 (creative-enhancement-pass) — the spark burst at a node's
-// activation point. Four fixed radial offsets (not random — random would
-// make the burst look slightly different every time, which reads as
-// noise rather than a single consistent "something switched on" beat, the
-// same reasoning behind the ignition token being one shared constant).
-// Small viewBox units (the assembly SVG is 0–100).
-const SPARK_OFFSETS = [
-  { dx: 2.2, dy: -1.4 },
-  { dx: -1.8, dy: -1.8 },
-  { dx: 1.2, dy: 2.1 },
-  { dx: -2, dy: 1 },
-];
-
 function quadrant(pos: { x: number; y: number }) {
   const dx = pos.x - HUB.x;
   const dy = pos.y - HUB.y;
@@ -80,7 +66,6 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
   const [mobileActiveId, setMobileActiveId] = useState<string | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const sparkRefs = useRef<Record<string, SVGCircleElement[]>>({});
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -100,26 +85,6 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
     document.addEventListener('click', onDocClick);
     return () => document.removeEventListener('click', onDocClick);
   }, [reduceMotion]);
-
-  // Task 2.1 (creative-enhancement-pass) — a one-shot spark burst at the
-  // node's own point, the instant its connecting line ignites. Reuses
-  // IGNITION_DURATION/IGNITION_EASE and the signal colour already applied
-  // to `.assembly-line--active` — no new timing or colour value. `fromTo`
-  // (not `to`) so every activation starts clean regardless of whether a
-  // previous burst on the same node was interrupted mid-fade.
-  useEffect(() => {
-    if (reduceMotion || !activeId) return;
-    const circles = sparkRefs.current[activeId];
-    if (!circles || circles.length === 0) return;
-    const tween = gsap.fromTo(
-      circles,
-      { attr: { r: 1.1 }, opacity: 1, transformOrigin: 'center' },
-      { attr: { r: 0.15 }, opacity: 0, duration: IGNITION_DURATION, ease: IGNITION_EASE, overwrite: true },
-    );
-    return () => {
-      tween.kill();
-    };
-  }, [activeId, reduceMotion]);
 
   const nodes = team.slice(0, 6).map((member, index) => ({
     member,
@@ -227,8 +192,17 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
         })}
       </div>
 
-      {/* Desktop (≥1024px): the radiating assembly. */}
-      <div className="assembly relative hidden w-full lg:block" style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}>
+      {/* Desktop (≥1024px): the radiating assembly. A bounded sheet, not a
+          diagram floating in open space — corner brackets and a faint
+          measurement grid borrow the same frame language as the Work
+          conveyor's carriages, so the two sections read as one system
+          rather than two unrelated experiments. */}
+      <div
+        className="assembly assembly--framed relative hidden w-full border border-border lg:block"
+        style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}
+      >
+        <span className="assembly__corner assembly__corner--tl" aria-hidden="true" />
+        <span className="assembly__corner assembly__corner--br" aria-hidden="true" />
         <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {nodes.map(({ member, pos }) => {
             const active = activeId === member.id;
@@ -244,31 +218,6 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                 vectorEffect="non-scaling-stroke"
                 className={`assembly-line${active ? ' assembly-line--active' : ''}`}
               />
-            );
-          })}
-          {/* Task 2.1 — spark burst circles, one group per node, sitting
-              at the exact point the line meets the node (x2, y2 above).
-              Hidden (opacity 0) until the activation effect fires them. */}
-          {nodes.map(({ member, pos }) => {
-            const x2 = dir === 'rtl' ? 100 - pos.x : pos.x;
-            return (
-              <g key={`${member.id}-spark`} transform={`translate(${x2}, ${pos.y})`} aria-hidden="true">
-                {SPARK_OFFSETS.map((offset, i) => (
-                  <circle
-                    key={i}
-                    ref={(el) => {
-                      const list = sparkRefs.current[member.id] ?? [];
-                      list[i] = el as SVGCircleElement;
-                      sparkRefs.current[member.id] = list;
-                    }}
-                    cx={offset.dx}
-                    cy={offset.dy}
-                    r={0.15}
-                    opacity={0}
-                    fill="var(--color-signal)"
-                  />
-                ))}
-              </g>
             );
           })}
         </svg>
@@ -320,8 +269,8 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                 }}
               >
                 <m.div
-                  className={`duotone duotone-fade relative overflow-hidden rounded-full border-2 border-void transition-[inline-size,block-size] duration-[var(--duration-ignition)] ${
-                    active ? 'is-revealed h-28 w-28 md:h-44 md:w-44' : 'h-16 w-16 md:h-24 md:w-24'
+                  className={`duotone duotone-fade relative overflow-hidden rounded-full border-2 border-void shadow-[0_0_0_1px_var(--color-border)] transition-[inline-size,block-size] duration-[var(--duration-ignition)] ${
+                    active ? 'is-revealed h-36 w-36 md:h-52 md:w-52' : 'h-24 w-24 md:h-32 md:w-32'
                   }`}
                   style={{ transitionTimingFunction: 'var(--ease-ignition)' }}
                   animate={active && !reduceMotion ? { rotateX: tilt.x, rotateY: tilt.y } : { rotateX: 0, rotateY: 0 }}
@@ -332,7 +281,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                     alt=""
                     fill
                     priority
-                    sizes={active ? '(min-width: 768px) 176px, 112px' : '(min-width: 768px) 96px, 64px'}
+                    sizes={active ? '(min-width: 768px) 208px, 144px' : '(min-width: 768px) 128px, 96px'}
                     className="object-cover"
                   />
                 </m.div>
