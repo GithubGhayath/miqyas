@@ -21,7 +21,15 @@ gsap.registerPlugin(ScrollTrigger);
  * unchanged from the previous vertical layout — that mechanic already
  * works, it just needed a less generic container.
  */
-export function WorkCarriage({ caseStudy, locale }: { caseStudy: CaseStudy; locale: Locale }) {
+export function WorkCarriage({
+  caseStudy,
+  locale,
+  onActivate,
+}: {
+  caseStudy: CaseStudy;
+  locale: Locale;
+  onActivate?: () => void;
+}) {
   const { t } = useLocalized();
   const tWork = useTranslations('work');
   const [revealed, setRevealed] = useState(false);
@@ -52,8 +60,12 @@ export function WorkCarriage({ caseStudy, locale }: { caseStudy: CaseStudy; loca
       href={`/work/${caseStudy.slug}`}
       transition="case-reveal"
       className="carriage group relative flex h-[480px] w-[26rem] flex-none flex-col border border-border bg-surface"
-      onMouseEnter={() => setRevealed(true)}
+      onMouseEnter={() => {
+        setRevealed(true);
+        onActivate?.();
+      }}
       onMouseLeave={() => !respectsReducedMotion() && setRevealed(false)}
+      onFocus={() => onActivate?.()}
     >
       <div
         className={`duotone duotone-fade relative flex-1 overflow-hidden${revealed ? ' is-revealed' : ''}`}
@@ -62,7 +74,10 @@ export function WorkCarriage({ caseStudy, locale }: { caseStudy: CaseStudy; loca
         {/* Fixed 26rem (416px) card width — only rendered inside
             WorkConveyor, which is desktop-only (≥1024px), so a fixed px
             value here is accurate rather than a vw-based guess. */}
-        <Image src={caseStudy.cover.src} alt={t(caseStudy.cover.alt)} fill sizes="416px" className="object-cover" />
+        {/* priority: see BeforeAfter.tsx — native lazy-loading doesn't
+            reliably fire for a `fill` image nested this many
+            `absolute`/`relative` layers deep. */}
+        <Image src={caseStudy.cover.src} alt={t(caseStudy.cover.alt)} fill priority sizes="416px" className="object-cover" />
       </div>
       <span className="carriage__corner carriage__corner--tl" aria-hidden="true" />
       <span className="carriage__corner carriage__corner--br" aria-hidden="true" />

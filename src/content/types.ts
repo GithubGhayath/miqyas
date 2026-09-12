@@ -80,6 +80,11 @@ export interface CaseStudy {
   brief: LocalizedRich;
   findings: LocalizedRich;
   decisionEnabled: LocalizedRich;
+  // FIX-AND-POLISH-V2 §3.4 — one sentence distinct from `findings` and
+  // `decisionEnabled`: the single takeaway a report like this exists to
+  // establish, e.g. "Proved the line's shutdown was a power problem, not a
+  // machine problem." Real content the report needs, not filler.
+  whatThisProves: Localized;
   equipment: EquipmentRow[];
   cover: ImageRef;
   beforeAfter?: { before: ImageRef; after: ImageRef };

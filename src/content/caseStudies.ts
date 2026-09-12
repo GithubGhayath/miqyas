@@ -40,6 +40,10 @@ export const caseStudies: CaseStudy[] = [
         'Instead of funding a full line refurbishment on the assumption of equipment damage, the owner funded an independent generator instead — at a fraction of the cost.',
       ],
     },
+    whatThisProves: {
+      ar: 'أثبت أن توقف الخط كان مشكلة كهرباء، لا مشكلة آلات.',
+      en: "Proved the line's shutdown was a power problem, not a machine problem.",
+    },
     equipment: [
       {
         id: 'eq-canning-1',
@@ -134,6 +138,10 @@ export const caseStudies: CaseStudy[] = [
         'The investor renegotiated the acquisition price based on the actual cost of correcting the crane runway and replacing the three motors, rather than a general estimate.',
       ],
     },
+    whatThisProves: {
+      ar: 'أثبت أن الأصل يستحق سعرًا أقل مما طُلب، لا أن يُرفض تمامًا.',
+      en: 'Proved the asset was worth a lower price, not a walk-away.',
+    },
     equipment: [
       {
         id: 'eq-foundry-1',
@@ -195,6 +203,10 @@ export const caseStudies: CaseStudy[] = [
     decisionEnabled: {
       ar: ['حدد المالك كلفة إعادة التشغيل بدقة قبل التفاوض على عقد الإيجار، بدل تسعير المستودع كمساحة فارغة فقط.'],
       en: ['The owner priced the restart accurately before negotiating the lease, rather than pricing the warehouse as empty space alone.'],
+    },
+    whatThisProves: {
+      ar: 'أثبت أن المستودع أصل يعمل جزئيًا، لا مساحة فارغة تُقيَّم من الصفر.',
+      en: 'Proved the warehouse was a partly working asset, not empty space priced from zero.',
     },
     equipment: [
       {

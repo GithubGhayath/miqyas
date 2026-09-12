@@ -62,10 +62,14 @@ export function WorkIndexRow({ caseStudy, locale }: { caseStudy: CaseStudy; loca
         className={`duotone duotone-fade ken-burns absolute inset-0${revealed ? ' is-revealed' : ''}`}
         style={{ viewTransitionName: `case-${caseStudy.slug}` } as CSSProperties}
       >
+        {/* priority: see BeforeAfter.tsx — native lazy-loading doesn't
+            reliably fire for a `fill` image nested this many
+            `absolute`/`relative` layers deep. */}
         <Image
           src={caseStudy.cover.src}
           alt={t(caseStudy.cover.alt)}
           fill
+          priority
           sizes="100vw"
           className="object-cover"
         />
