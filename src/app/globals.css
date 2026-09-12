@@ -680,6 +680,38 @@ html[lang="en"] body {
     border-inline-end: 2px solid var(--color-signal);
   }
 
+  /* Task 3.3 (creative-enhancement-pass) — the cross-section reveal.
+     `.carriage__cross-section-image` reuses the SVG edge-detection filter
+     defined once in WorkConveyor.tsx (`#carriage-technical-edge`) rather
+     than a second per-carriage copy; `screen` blend drops the filter's
+     near-black background and keeps only its bright edge lines, so it
+     reads as a line-diagram sitting over the real photo, not a second
+     opaque photo. */
+  .carriage__cross-section-image {
+    filter: url(#carriage-technical-edge);
+    mix-blend-mode: screen;
+  }
+  .carriage__sweep-line {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    block-size: 2px;
+    background: var(--color-signal);
+    box-shadow: 0 0 8px 1px var(--color-signal);
+    opacity: 0;
+  }
+
+  /* Task 3.1 (creative-enhancement-pass) — the conveyor's read-only
+     progress rail. Fixed near the bottom of the pinned section (the
+     track above it is h-screen, so this has to be taken out of flow to
+     sit on screen rather than pushed below the fold). */
+  .work-progress-rail {
+    position: absolute;
+    inset-inline: 0;
+    bottom: var(--spacing-xl);
+    z-index: 5;
+  }
+
   /* Work conveyor detail strip — FIX-AND-POLISH-V3 §5.2. Cross-fades in
      on a fresh key every time the active case study changes, the same
      technique already used for the RailSelect coach-mark. */

@@ -25,15 +25,24 @@ export function WorkCarriage({
   caseStudy,
   locale,
   onActivate,
+  sweepTrigger = 0,
 }: {
   caseStudy: CaseStudy;
   locale: Locale;
   onActivate?: () => void;
+  /** Task 3.3 (creative-enhancement-pass) — increments each time the
+   *  conveyor settles on *this* carriage; 0 means "never settled yet"
+   *  (skipped, not a mount-time flash). See WorkConveyor's settle
+   *  detection for how this is computed. */
+  sweepTrigger?: number;
 }) {
   const { t } = useLocalized();
   const tWork = useTranslations('work');
   const [revealed, setRevealed] = useState(false);
   const cardRef = useRef<HTMLAnchorElement>(null);
+  const crossSectionRef = useRef<HTMLDivElement>(null);
+  const sweepLineRef = useRef<HTMLSpanElement>(null);
+  const sweepMountedRef = useRef(false);
 
   useEffect(() => {
     if (respectsReducedMotion()) {
@@ -54,11 +63,39 @@ export function WorkCarriage({
     }
   }, []);
 
+  // Task 3.3 — the instant the conveyor comes to rest on this carriage, a
+  // thin line sweeps once down the cover, with a simplified technical
+  // line-diagram version of the same photo showing through directly
+  // behind the sweep before the real photograph settles back. Runs once
+  // per settle (guarded by `sweepTrigger` changing, not by any interval),
+  // never on first mount, never under reduced motion.
+  useEffect(() => {
+    if (!sweepMountedRef.current) {
+      sweepMountedRef.current = true;
+      return;
+    }
+    if (!sweepTrigger || respectsReducedMotion()) return;
+    const overlay = crossSectionRef.current;
+    const line = sweepLineRef.current;
+    if (!overlay || !line) return;
+    const tl = gsap.timeline();
+    tl.set(overlay, { opacity: 0 })
+      .set(line, { top: '0%', opacity: 1 })
+      .to(overlay, { opacity: 0.85, duration: 0.15, ease: 'power1.out' }, 0)
+      .to(line, { top: '100%', duration: 0.55, ease: 'power2.inOut' }, 0)
+      .to(overlay, { opacity: 0, duration: 0.25, ease: 'power1.in' }, 0.35)
+      .to(line, { opacity: 0, duration: 0.15 }, 0.5);
+    return () => {
+      tl.kill();
+    };
+  }, [sweepTrigger]);
+
   return (
     <TransitionLink
       ref={cardRef}
       href={`/work/${caseStudy.slug}`}
       transition="case-reveal"
+      data-case-id={caseStudy.id}
       className="carriage group relative flex h-[480px] w-[26rem] flex-none flex-col border border-border bg-surface"
       onMouseEnter={() => {
         setRevealed(true);
@@ -78,6 +115,18 @@ export function WorkCarriage({
             reliably fire for a `fill` image nested this many
             `absolute`/`relative` layers deep. */}
         <Image src={caseStudy.cover.src} alt={t(caseStudy.cover.alt)} fill priority sizes="416px" className="object-cover" />
+        {/* Task 3.3 — the technical cross-section overlay + sweep line,
+            hidden until a settle event fires the timeline above. */}
+        <div ref={crossSectionRef} className="carriage__cross-section pointer-events-none absolute inset-0 opacity-0" aria-hidden="true">
+          <Image
+            src={caseStudy.cover.src}
+            alt=""
+            fill
+            sizes="416px"
+            className="carriage__cross-section-image object-cover"
+          />
+          <span ref={sweepLineRef} className="carriage__sweep-line" aria-hidden="true" />
+        </div>
       </div>
       <span className="carriage__corner carriage__corner--tl" aria-hidden="true" />
       <span className="carriage__corner carriage__corner--br" aria-hidden="true" />
