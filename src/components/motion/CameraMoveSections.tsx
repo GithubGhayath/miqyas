@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { usePathname } from '@/i18n/navigation';
 import { respectsReducedMotion } from '@/lib/ignition';
+import { spikeInstrumentTrace } from '@/lib/instrumentTrace';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,6 +38,7 @@ gsap.registerPlugin(ScrollTrigger);
 export function CameraMoveSections() {
   const pathname = usePathname();
   const cleanupRef = useRef<(() => void) | null>(null);
+  const ignitedRef = useRef<WeakSet<HTMLElement>>(new WeakSet());
 
   useEffect(() => {
     if (respectsReducedMotion()) return;
@@ -63,6 +65,19 @@ export function CameraMoveSections() {
         }
         const proximity = 1 - Math.min(1, distance / centre);
         gsap.set(section, { opacity: 0.35 + 0.65 * proximity, scale: 0.9 + 0.1 * proximity });
+
+        // "A section ignites" (FIX-AND-POLISH-V3 §5.3) — the instant
+        // proximity reaches full focus, once per entry, not every frame
+        // it stays there. Cleared once the section leaves full focus so
+        // scrolling back through it later spikes again.
+        if (distance === 0) {
+          if (!ignitedRef.current.has(section)) {
+            ignitedRef.current.add(section);
+            spikeInstrumentTrace(1.5);
+          }
+        } else {
+          ignitedRef.current.delete(section);
+        }
       }
 
       sections.forEach((section) => {

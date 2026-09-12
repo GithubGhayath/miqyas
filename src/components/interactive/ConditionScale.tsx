@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type { ConditionGrade } from '@/content/types';
 import { useLocalized } from '@/hooks/useLocalized';
+import { spikeInstrumentTrace } from '@/lib/instrumentTrace';
 import { GradeChip } from '@/components/ui/GradeChip';
 import { MediaFigure } from '@/components/ui/MediaFigure';
 import { RailSelect } from '@/components/ui/RailSelect';
@@ -19,7 +20,12 @@ export function ConditionScale({ grades }: { grades: ConditionGrade[] }) {
       ariaLabel={tGrade('label')}
       coachMarkCaption={tGrade('coachMark')}
       activeId={activeId}
-      onChange={setActiveId}
+      onChange={(id) => {
+        // A grade chip "resolving" on a new reading (FIX-AND-POLISH-V3
+        // §5.3) — the instrument trace spikes at this moment.
+        spikeInstrumentTrace(1);
+        setActiveId(id);
+      }}
       options={grades.map((g) => ({
         id: String(g.grade),
         tickLabel: g.grade,

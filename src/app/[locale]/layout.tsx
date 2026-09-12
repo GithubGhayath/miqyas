@@ -15,6 +15,7 @@ import { MotionProvider } from '@/components/motion/MotionProvider';
 import { ViewTransitionsProvider } from '@/components/motion/ViewTransitionsProvider';
 import { SmoothScroll } from '@/components/providers/SmoothScroll';
 import { CameraMoveSections } from '@/components/motion/CameraMoveSections';
+import { InstrumentTrace } from '@/components/motion/InstrumentTrace';
 import { SplashScreen } from '@/components/splash/SplashScreen';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -111,6 +112,7 @@ export default async function LocaleLayout({
                     {t('skipToContent')}
                   </a>
                   <SheetMargin />
+                  <InstrumentTrace />
                   <div style={{ viewTransitionName: 'site-header' } as CSSProperties}>
                     <Header site={site} />
                   </div>
