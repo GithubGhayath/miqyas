@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useTranslations } from 'next-intl';
 import type { CaseStudy, Locale } from '@/content/types';
 import { pick } from '@/lib/pick';
 import { useDirection } from '@/hooks/useDirection';
 import { respectsReducedMotion } from '@/lib/ignition';
+import { spikeInstrumentTrace } from '@/lib/instrumentTrace';
 import { WorkCarriage } from '@/components/work/WorkCarriage';
 import { KineticHeading } from '@/components/motion/KineticHeading';
+import { TitleBlock } from '@/components/ui/TitleBlock';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,19 +26,29 @@ gsap.registerPlugin(ScrollTrigger);
  * `.bleed` stack instead, a deliberate breakpoint behaviour, not a
  * compromise.
  *
- * FIX-AND-POLISH-V2 §3.4 — a pulled takeaway below the rail (real content:
- * `CaseStudy.whatThisProves`, not decoration), following whichever
- * carriage the visitor last focused or hovered, in the display face with
- * a `KineticHeading` word-stagger reveal each time it changes. This fills
- * the empty space below the conveyor with the single highest-weight fact
- * a report like this exists to establish, rather than a generic shape.
+ * FIX-AND-POLISH-V2 §3.4 / V3 §5.2 — a detail strip below the rail (real
+ * content, not decoration) following whichever carriage the visitor last
+ * focused or hovered: a facts column (sector, governorate, year, pulled
+ * straight from `CaseStudy`) with the `whatThisProves` takeaway, and a
+ * pull-quote lifted from the first `findings` paragraph set large in the
+ * display face. This is Variant A's index-and-detail idea combined with
+ * the existing full-height conveyor rather than shrinking it — the
+ * conveyor's horizontal-scroll mechanic is worth strengthening, not
+ * trading away for a compact selector strip (V3 §5.1). Selecting a
+ * different carriage cross-fades the whole strip in on a fresh key.
  */
 export function WorkConveyor({ caseStudies, locale }: { caseStudies: CaseStudy[]; locale: Locale }) {
   const { dir } = useDirection();
+  const tWork = useTranslations('work');
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState(caseStudies[0]?.id);
   const activeCaseStudy = caseStudies.find((c) => c.id === activeId) ?? caseStudies[0];
+
+  function activate(id: string) {
+    if (id !== activeId) spikeInstrumentTrace(1);
+    setActiveId(id);
+  }
 
   useEffect(() => {
     if (respectsReducedMotion()) return;
@@ -68,28 +81,47 @@ export function WorkConveyor({ caseStudies, locale }: { caseStudies: CaseStudy[]
 
   if (!activeCaseStudy) return null;
 
+  const pullQuote = activeCaseStudy.findings[locale][0];
+
   return (
     <>
       <section ref={sectionRef} className="conveyor relative hidden overflow-hidden lg:block" aria-label="Work">
         <div ref={trackRef} className="conveyor__track relative flex h-screen w-max items-center gap-[var(--spacing-xl)] px-[var(--spacing-2xl)]">
           <span className="conveyor__rail" aria-hidden="true" />
           {caseStudies.map((caseStudy) => (
-            <WorkCarriage key={caseStudy.id} caseStudy={caseStudy} locale={locale} onActivate={() => setActiveId(caseStudy.id)} />
+            <WorkCarriage key={caseStudy.id} caseStudy={caseStudy} locale={locale} onActivate={() => activate(caseStudy.id)} />
           ))}
         </div>
       </section>
 
       <div className="frame hidden py-[var(--spacing-xl)] lg:block">
-        <span className="font-mono text-[length:var(--step--1)] text-ink-3">
-          {pick(activeCaseStudy.title, locale)}
-        </span>
-        <KineticHeading
+        <div
           key={activeCaseStudy.id}
-          as="p"
-          className="u-display mt-[var(--spacing-2xs)] measure-block text-[length:var(--step-3)] text-ink"
+          className="work-detail grid grid-cols-1 gap-[var(--spacing-l)] md:grid-cols-[minmax(0,320px)_1fr] md:items-start"
         >
-          {pick(activeCaseStudy.whatThisProves, locale)}
-        </KineticHeading>
+          <div className="flex flex-col gap-[var(--spacing-s)]">
+            <span className="font-mono text-[length:var(--step--1)] text-ink-3">
+              {pick(activeCaseStudy.title, locale)}
+            </span>
+            <TitleBlock
+              cells={[
+                { label: tWork('sector'), value: pick(activeCaseStudy.sector, locale) },
+                { label: tWork('governorate'), value: pick(activeCaseStudy.governorate, locale) },
+                { label: tWork('year'), value: String(activeCaseStudy.year) },
+              ]}
+            />
+            <KineticHeading
+              key={`${activeCaseStudy.id}-proves`}
+              as="p"
+              className="u-display measure-block text-[length:var(--step-2)] text-ink"
+            >
+              {pick(activeCaseStudy.whatThisProves, locale)}
+            </KineticHeading>
+          </div>
+          <blockquote className="work-detail__quote u-display measure-block text-[length:var(--step-3)] text-ink">
+            {pullQuote}
+          </blockquote>
+        </div>
       </div>
     </>
   );

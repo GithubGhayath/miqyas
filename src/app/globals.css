@@ -492,6 +492,29 @@ html[lang="en"] body {
     }
   }
 
+  /* Instrument trace — FIX-AND-POLISH-V3 §5.3: a continuous oscilloscope
+     line in the margin opposite `.sheet-margin`, fixed to the viewport
+     (not the document) so it always reads the current moment rather than
+     scrolling away with the page. Desktop-only, matching the Work
+     conveyor's own breakpoint — see InstrumentTrace.tsx for why. */
+  .instrument-trace {
+    display: none;
+    position: fixed;
+    inset-inline-end: 0;
+    top: 0;
+    bottom: 0;
+    inline-size: 24px;
+    block-size: 100dvh;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @media (min-width: 64rem) {
+    .instrument-trace {
+      display: block;
+    }
+  }
+
   /* Near-invisible grain — UI-REFACTOR-PROMPT §3.4. Answers "flat structure
      needs tactility" (§1.3); kept faint enough not to read as an effect. */
   .grain-overlay,
@@ -636,6 +659,26 @@ html[lang="en"] body {
     inset-inline-end: -1px;
     border-block-end: 2px solid var(--color-signal);
     border-inline-end: 2px solid var(--color-signal);
+  }
+
+  /* Work conveyor detail strip — FIX-AND-POLISH-V3 §5.2. Cross-fades in
+     on a fresh key every time the active case study changes, the same
+     technique already used for the RailSelect coach-mark. */
+  .work-detail {
+    animation: work-detail-fade-in var(--duration-ignition) var(--ease-ignition);
+  }
+  @keyframes work-detail-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .work-detail__quote {
+    position: relative;
+    padding-inline-start: var(--spacing-m);
+    border-inline-start: 2px solid var(--color-signal);
   }
 
   /* Exploded-view equipment diagram — FIX-AND-POLISH-V1 §2.3: the short
