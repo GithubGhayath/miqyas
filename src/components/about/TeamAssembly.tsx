@@ -3,10 +3,11 @@
 import Image from 'next/image';
 import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import gsap from 'gsap';
 import type { Locale, TeamMember } from '@/content/types';
 import { pick } from '@/lib/pick';
 import { useDirection } from '@/hooks/useDirection';
-import { respectsReducedMotion } from '@/lib/ignition';
+import { IGNITION_DURATION, IGNITION_EASE, respectsReducedMotion } from '@/lib/ignition';
 import { TitleBlock } from '@/components/ui/TitleBlock';
 
 /**
@@ -45,6 +46,19 @@ const POSITIONS: { x: number; y: number }[] = [
   { x: 10, y: 20 },
 ];
 
+// Task 2.1 (creative-enhancement-pass) — the spark burst at a node's
+// activation point. Four fixed radial offsets (not random — random would
+// make the burst look slightly different every time, which reads as
+// noise rather than a single consistent "something switched on" beat, the
+// same reasoning behind the ignition token being one shared constant).
+// Small viewBox units (the assembly SVG is 0–100).
+const SPARK_OFFSETS = [
+  { dx: 2.2, dy: -1.4 },
+  { dx: -1.8, dy: -1.8 },
+  { dx: 1.2, dy: 2.1 },
+  { dx: -2, dy: 1 },
+];
+
 function quadrant(pos: { x: number; y: number }) {
   const dx = pos.x - HUB.x;
   const dy = pos.y - HUB.y;
@@ -64,6 +78,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
   const [mobileActiveId, setMobileActiveId] = useState<string | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const sparkRefs = useRef<Record<string, SVGCircleElement[]>>({});
 
   useEffect(() => {
     // Whether the whole diagram collapses to a static list is client-only
@@ -82,6 +97,26 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
     document.addEventListener('click', onDocClick);
     return () => document.removeEventListener('click', onDocClick);
   }, [reduceMotion]);
+
+  // Task 2.1 (creative-enhancement-pass) — a one-shot spark burst at the
+  // node's own point, the instant its connecting line ignites. Reuses
+  // IGNITION_DURATION/IGNITION_EASE and the signal colour already applied
+  // to `.assembly-line--active` — no new timing or colour value. `fromTo`
+  // (not `to`) so every activation starts clean regardless of whether a
+  // previous burst on the same node was interrupted mid-fade.
+  useEffect(() => {
+    if (reduceMotion || !activeId) return;
+    const circles = sparkRefs.current[activeId];
+    if (!circles || circles.length === 0) return;
+    const tween = gsap.fromTo(
+      circles,
+      { attr: { r: 1.1 }, opacity: 1, transformOrigin: 'center' },
+      { attr: { r: 0.15 }, opacity: 0, duration: IGNITION_DURATION, ease: IGNITION_EASE, overwrite: true },
+    );
+    return () => {
+      tween.kill();
+    };
+  }, [activeId, reduceMotion]);
 
   const nodes = team.slice(0, 6).map((member, index) => ({
     member,
@@ -188,6 +223,31 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                 vectorEffect="non-scaling-stroke"
                 className={`assembly-line${active ? ' assembly-line--active' : ''}`}
               />
+            );
+          })}
+          {/* Task 2.1 — spark burst circles, one group per node, sitting
+              at the exact point the line meets the node (x2, y2 above).
+              Hidden (opacity 0) until the activation effect fires them. */}
+          {nodes.map(({ member, pos }) => {
+            const x2 = dir === 'rtl' ? 100 - pos.x : pos.x;
+            return (
+              <g key={`${member.id}-spark`} transform={`translate(${x2}, ${pos.y})`} aria-hidden="true">
+                {SPARK_OFFSETS.map((offset, i) => (
+                  <circle
+                    key={i}
+                    ref={(el) => {
+                      const list = sparkRefs.current[member.id] ?? [];
+                      list[i] = el as SVGCircleElement;
+                      sparkRefs.current[member.id] = list;
+                    }}
+                    cx={offset.dx}
+                    cy={offset.dy}
+                    r={0.15}
+                    opacity={0}
+                    fill="var(--color-signal)"
+                  />
+                ))}
+              </g>
             );
           })}
         </svg>
