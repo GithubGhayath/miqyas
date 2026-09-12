@@ -46,6 +46,24 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
   const t = useTranslations('splash');
   const locale = useLocale() as Locale;
   const displayRef = useRef({ value: 0 });
+  const wordmarkRef = useRef<HTMLDivElement>(null);
+
+  // Nameplate sheen (FIX-AND-POLISH-V2 §5.2) — a soft diagonal band of
+  // light crossing the wordmark once, as if catching a stamped metal
+  // plate, direction-aware so it travels the same reading direction as
+  // the locale. One pass only, ~600ms, no separate DOM layer: the
+  // gradient is clipped to the text itself via `background-clip: text`.
+  useEffect(() => {
+    if (!igniting || reduceMotion) return;
+    const el = wordmarkRef.current;
+    if (!el) return;
+    const isRtl = locale === 'ar';
+    gsap.fromTo(
+      el,
+      { backgroundPosition: isRtl ? '-150% 0' : '250% 0' },
+      { backgroundPosition: isRtl ? '250% 0' : '-150% 0', duration: 0.6, ease: 'power2.inOut' },
+    );
+  }, [igniting, reduceMotion, locale]);
 
   useEffect(() => {
     if (document.documentElement.hasAttribute(SPLASH_SKIP_ATTR)) {
@@ -129,6 +147,12 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
 
   const announcedPercent = roundToStep(percent);
   const aperturePct = reduceMotion ? 100 : Math.min(100, percent);
+  // Calibration readout (FIX-AND-POLISH-V2 §5.2) — the percentage stays
+  // real and load-bound (unchanged); this is paired status text only,
+  // turning the wait into "an instrument calibrating" rather than a bare
+  // progress bar.
+  const calibrationText =
+    percent < 33 ? t('calibrationLow') : percent < 66 ? t('calibrationMid') : t('calibrationHigh');
   const sketchColor = igniting ? 'var(--color-ember)' : 'var(--color-signal)';
 
   return (
@@ -197,11 +221,26 @@ export function SplashScreen({ site }: { site: SiteConfig }) {
       </svg>
 
       {!igniting ? (
-        <div className="mt-[var(--spacing-m)] font-mono text-[length:var(--step--1)] text-ink-2">
-          <Measure value={percent} unit="%" />
+        <div className="mt-[var(--spacing-m)] flex flex-col items-center gap-[var(--spacing-3xs)]">
+          <span className="font-mono text-[length:var(--step--1)] text-ink-2">
+            <Measure value={percent} unit="%" />
+          </span>
+          <span className="font-mono text-[length:var(--step--1)] text-ink-3">{calibrationText}</span>
         </div>
       ) : (
-        <div className="u-display mt-[var(--spacing-m)] text-[length:var(--step-2)] tracking-[0.04em] text-ink">
+        <div
+          ref={wordmarkRef}
+          className="u-display mt-[var(--spacing-m)] text-[length:var(--step-2)] tracking-[0.04em]"
+          style={{
+            backgroundImage:
+              'linear-gradient(105deg, var(--color-ink) 40%, var(--color-signal-text) 50%, var(--color-ink) 60%)',
+            backgroundSize: '250% 100%',
+            backgroundPosition: '0 0',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: reduceMotion ? 'var(--color-ink)' : 'transparent',
+          }}
+        >
           {pick(site.name, locale)}
         </div>
       )}

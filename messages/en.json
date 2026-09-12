@@ -1,7 +1,10 @@
 {
   "splash": {
     "label": "Loading",
-    "announce": "Loading, {percent} percent"
+    "announce": "Loading, {percent} percent",
+    "calibrationLow": "Detecting fixtures",
+    "calibrationMid": "Reading condition",
+    "calibrationHigh": "Finalising the reading"
   },
   "nav": {
     "primary": "Primary navigation",
@@ -55,6 +58,8 @@
   "method": {
     "title": "Method",
     "phasesHeading": "The five phases",
+    "phasesCoachMark": "Click a number to explore each phase",
+    "tiersCoachMark": "Click to compare preliminary and full",
     "clientRole": "Client's role",
     "deliverables": "Deliverables",
     "duration": "Duration",
@@ -91,6 +96,7 @@
   "about": {
     "title": "About",
     "teamHeading": "Team",
+    "teamIntro": "Six people, one methodology. Tap a member to read what they do.",
     "unknownHeading": "How we handle what we don't know",
     "unknownBody": "First reports are reviewed by an independent senior engineer before delivery, and scope limits are written on page one of every report.",
     "faqHeading": "Frequently asked questions"
@@ -164,6 +170,7 @@
     "after": "After"
   },
   "grade": {
-    "label": "Grade"
+    "label": "Grade",
+    "coachMark": "Click a grade to see what it means"
   }
 }
