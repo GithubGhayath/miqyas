@@ -82,10 +82,6 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const sparkRefs = useRef<Record<string, SVGCircleElement[]>>({});
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const assemblyRef = useRef<HTMLDivElement>(null);
-  const caliperCursorRef = useRef<HTMLDivElement>(null);
-  const caliperReadoutRef = useRef<HTMLSpanElement>(null);
-  const [caliperActive, setCaliperActive] = useState(false);
 
   useEffect(() => {
     // Whether the whole diagram collapses to a static list is client-only
@@ -163,36 +159,6 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
     setTilt({ x: -py * MAX_TILT_DEG * 2, y: px * MAX_TILT_DEG * 2 });
   }
 
-  // Task 2.3 (creative-enhancement-pass, trial) — a caliper-tip cursor
-  // within the Team section that reads out a plausible (purely decorative,
-  // not a real measurement) distance to the nearest node. Direct DOM
-  // writes on mousemove, not React state, so this doesn't force a
-  // re-render on every pointer frame. Desktop/fine-pointer only.
-  const DECORATIVE_MM_PER_PX = 2.6;
-
-  function onAssemblyMouseMove(event: { clientX: number; clientY: number }) {
-    if (reduceMotion || !window.matchMedia('(pointer: fine)').matches) return;
-    const rect = assemblyRef.current?.getBoundingClientRect();
-    const cursorEl = caliperCursorRef.current;
-    const readoutEl = caliperReadoutRef.current;
-    if (!rect || !cursorEl || !readoutEl) return;
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    cursorEl.style.transform = `translate(${x}px, ${y}px)`;
-
-    let minDist = Infinity;
-    for (const { pos } of nodes) {
-      const nx = ((dir === 'rtl' ? 100 - pos.x : pos.x) / 100) * rect.width;
-      const ny = (pos.y / 100) * rect.height;
-      minDist = Math.min(minDist, Math.hypot(x - nx, y - ny));
-    }
-    readoutEl.textContent = `${Math.round(minDist * DECORATIVE_MM_PER_PX)}mm`;
-  }
-
-  function onAssemblyMouseEnter() {
-    if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) setCaliperActive(true);
-  }
-
   // Reduced motion: a static, readable list rather than six permanently-
   // expanded, overlapping callouts crowded into the same scattered
   // coordinates — the spec's own requirement is "all six fully visible,
@@ -262,33 +228,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
       </div>
 
       {/* Desktop (≥1024px): the radiating assembly. */}
-      <div
-        ref={assemblyRef}
-        className={`assembly relative hidden w-full lg:block${caliperActive ? ' assembly--caliper' : ''}`}
-        style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}
-        onMouseEnter={onAssemblyMouseEnter}
-        onMouseMove={onAssemblyMouseMove}
-        onMouseLeave={() => setCaliperActive(false)}
-      >
-        {/* Task 2.3 (trial) — the caliper cursor and its decorative
-            distance-to-nearest-node readout. Purely a delight detail: the
-            "measurement" is not real, and this earns its place only if it
-            reads as on-brand rather than gimmicky (see the verification
-            note in the enhancement-pass commit history). */}
-        {caliperActive ? (
-          <div ref={caliperCursorRef} className="assembly-caliper pointer-events-none absolute left-0 top-0 z-20" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M1.5 1.5 L1.5 6.5 M1.5 1.5 L6.5 1.5 M16.5 16.5 L16.5 11.5 M16.5 16.5 L11.5 16.5"
-                stroke="var(--color-signal)"
-                strokeWidth="1.5"
-              />
-            </svg>
-            <span ref={caliperReadoutRef} className="assembly-caliper__readout font-mono text-[length:var(--step--2)] text-signal-text">
-              0mm
-            </span>
-          </div>
-        ) : null}
+      <div className="assembly relative hidden w-full lg:block" style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}>
         <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {nodes.map(({ member, pos }) => {
             const active = activeId === member.id;
