@@ -582,8 +582,27 @@ html[lang="en"] body {
     block-size: 1.75em;
     border-radius: 50%;
     background: var(--color-signal);
-    transform: translate(-50%, -50%);
     box-shadow: 0 0 0 4px var(--color-void);
+    /* Task 2.4 (creative-enhancement-pass) — a slow, barely-perceptible
+       independent float, so the hub reads as sitting at a different depth
+       than the flat plane of member nodes around it. cubic-bezier below
+       is the standard sine-ease-in-out approximation (GSAP's
+       `sine.inOut`), not a new easing invented for this one animation. */
+    animation: assembly-hub-drift 11s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate;
+  }
+  @keyframes assembly-hub-drift {
+    from {
+      transform: translate(-50%, -50%);
+    }
+    to {
+      transform: translate(-50%, calc(-50% - 3px));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .assembly-hub {
+      animation: none;
+      transform: translate(-50%, -50%);
+    }
   }
   .assembly-line {
     stroke: var(--color-border);
