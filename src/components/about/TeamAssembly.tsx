@@ -3,11 +3,13 @@
 import Image from 'next/image';
 import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { m } from 'motion/react';
 import gsap from 'gsap';
 import type { Locale, TeamMember } from '@/content/types';
 import { pick } from '@/lib/pick';
 import { useDirection } from '@/hooks/useDirection';
 import { IGNITION_DURATION, IGNITION_EASE, respectsReducedMotion } from '@/lib/ignition';
+import { springSnappy } from '@/lib/motion';
 import { TitleBlock } from '@/components/ui/TitleBlock';
 
 /**
@@ -79,6 +81,11 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
   const [reduceMotion, setReduceMotion] = useState(false);
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const sparkRefs = useRef<Record<string, SVGCircleElement[]>>({});
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const assemblyRef = useRef<HTMLDivElement>(null);
+  const caliperCursorRef = useRef<HTMLDivElement>(null);
+  const caliperReadoutRef = useRef<HTMLSpanElement>(null);
+  const [caliperActive, setCaliperActive] = useState(false);
 
   useEffect(() => {
     // Whether the whole diagram collapses to a static list is client-only
@@ -136,6 +143,54 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
       event.preventDefault();
       btnRefs.current[nodes[next].member.id]?.focus();
     }
+  }
+
+  // Task 2.2 (creative-enhancement-pass) — a small perspective tilt on the
+  // focused portrait, following cursor position within the node, as if it
+  // were a physical object under the spotlight rather than a flat image.
+  // Reuses SurveyHero's own hero-tilt mechanic exactly (`m.div` +
+  // `animate={{ rotateX, rotateY }}` + the shared `springSnappy` token,
+  // not a new damping curve) rather than inventing a parallel GSAP
+  // version of the same idea. Desktop/fine-pointer only, disabled under
+  // reduced motion.
+  const MAX_TILT_DEG = 5;
+
+  function onPortraitPointerMove(event: { currentTarget: HTMLElement; clientX: number; clientY: number }) {
+    if (reduceMotion || !window.matchMedia('(pointer: fine)').matches) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width - 0.5;
+    const py = (event.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: -py * MAX_TILT_DEG * 2, y: px * MAX_TILT_DEG * 2 });
+  }
+
+  // Task 2.3 (creative-enhancement-pass, trial) — a caliper-tip cursor
+  // within the Team section that reads out a plausible (purely decorative,
+  // not a real measurement) distance to the nearest node. Direct DOM
+  // writes on mousemove, not React state, so this doesn't force a
+  // re-render on every pointer frame. Desktop/fine-pointer only.
+  const DECORATIVE_MM_PER_PX = 2.6;
+
+  function onAssemblyMouseMove(event: { clientX: number; clientY: number }) {
+    if (reduceMotion || !window.matchMedia('(pointer: fine)').matches) return;
+    const rect = assemblyRef.current?.getBoundingClientRect();
+    const cursorEl = caliperCursorRef.current;
+    const readoutEl = caliperReadoutRef.current;
+    if (!rect || !cursorEl || !readoutEl) return;
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    cursorEl.style.transform = `translate(${x}px, ${y}px)`;
+
+    let minDist = Infinity;
+    for (const { pos } of nodes) {
+      const nx = ((dir === 'rtl' ? 100 - pos.x : pos.x) / 100) * rect.width;
+      const ny = (pos.y / 100) * rect.height;
+      minDist = Math.min(minDist, Math.hypot(x - nx, y - ny));
+    }
+    readoutEl.textContent = `${Math.round(minDist * DECORATIVE_MM_PER_PX)}mm`;
+  }
+
+  function onAssemblyMouseEnter() {
+    if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) setCaliperActive(true);
   }
 
   // Reduced motion: a static, readable list rather than six permanently-
@@ -207,7 +262,33 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
       </div>
 
       {/* Desktop (≥1024px): the radiating assembly. */}
-      <div className="assembly relative hidden w-full lg:block" style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}>
+      <div
+        ref={assemblyRef}
+        className={`assembly relative hidden w-full lg:block${caliperActive ? ' assembly--caliper' : ''}`}
+        style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}
+        onMouseEnter={onAssemblyMouseEnter}
+        onMouseMove={onAssemblyMouseMove}
+        onMouseLeave={() => setCaliperActive(false)}
+      >
+        {/* Task 2.3 (trial) — the caliper cursor and its decorative
+            distance-to-nearest-node readout. Purely a delight detail: the
+            "measurement" is not real, and this earns its place only if it
+            reads as on-brand rather than gimmicky (see the verification
+            note in the enhancement-pass commit history). */}
+        {caliperActive ? (
+          <div ref={caliperCursorRef} className="assembly-caliper pointer-events-none absolute left-0 top-0 z-20" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path
+                d="M1.5 1.5 L1.5 6.5 M1.5 1.5 L6.5 1.5 M16.5 16.5 L16.5 11.5 M16.5 16.5 L11.5 16.5"
+                stroke="var(--color-signal)"
+                strokeWidth="1.5"
+              />
+            </svg>
+            <span ref={caliperReadoutRef} className="assembly-caliper__readout font-mono text-[length:var(--step--2)] text-signal-text">
+              0mm
+            </span>
+          </div>
+        ) : null}
         <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {nodes.map(({ member, pos }) => {
             const active = activeId === member.id;
@@ -267,12 +348,19 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
               key={member.id}
               data-assembly-node
               className="absolute"
-              style={{ insetInlineStart: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)' }}
+              style={{
+                insetInlineStart: `${pos.x}%`,
+                top: `${pos.y}%`,
+                transform: 'translate(-50%, -50%)',
+                perspective: 700,
+              }}
               onMouseEnter={() => window.matchMedia('(pointer: fine)').matches && setActiveId(member.id)}
-              onMouseLeave={() =>
-                window.matchMedia('(pointer: fine)').matches &&
-                setActiveId((current) => (current === member.id ? null : current))
-              }
+              onMouseLeave={() => {
+                if (!window.matchMedia('(pointer: fine)').matches) return;
+                setActiveId((current) => (current === member.id ? null : current));
+                setTilt({ x: 0, y: 0 });
+              }}
+              onMouseMove={onPortraitPointerMove}
             >
               <button
                 ref={(el) => {
@@ -291,11 +379,13 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                   setActiveId((current) => (current === member.id ? null : member.id));
                 }}
               >
-                <div
+                <m.div
                   className={`duotone duotone-fade relative overflow-hidden rounded-full border-2 border-void transition-[inline-size,block-size] duration-[var(--duration-ignition)] ${
                     active ? 'is-revealed h-28 w-28 md:h-44 md:w-44' : 'h-16 w-16 md:h-24 md:w-24'
                   }`}
                   style={{ transitionTimingFunction: 'var(--ease-ignition)' }}
+                  animate={active && !reduceMotion ? { rotateX: tilt.x, rotateY: tilt.y } : { rotateX: 0, rotateY: 0 }}
+                  transition={springSnappy}
                 >
                   <Image
                     src={member.portrait.src}
@@ -305,7 +395,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                     sizes={active ? '(min-width: 768px) 176px, 112px' : '(min-width: 768px) 96px, 64px'}
                     className="object-cover"
                   />
-                </div>
+                </m.div>
                 <span className="pointer-events-none font-mono text-[length:var(--step--1)] text-ink-3">
                   {pick(member.name, locale)}
                 </span>

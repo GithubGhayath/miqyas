@@ -618,6 +618,20 @@ html[lang="en"] body {
   .assembly-node {
     cursor: pointer;
   }
+  /* Task 2.3 (creative-enhancement-pass, trial) — the caliper cursor.
+     Native cursor hidden only while this custom one is active, and only
+     ever applied to this one section. */
+  .assembly--caliper {
+    cursor: none;
+  }
+  .assembly-caliper {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3xs);
+    margin-inline-start: -2px;
+    margin-block-start: -2px;
+    white-space: nowrap;
+  }
   .assembly-panel {
     animation: assembly-panel-in var(--duration-ignition) var(--ease-ignition);
   }
