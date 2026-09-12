@@ -329,6 +329,21 @@ html[lang="en"] body {
     transform: translate(-50%, -50%);
     pointer-events: none;
   }
+  /* RailSelect coach-mark — FIX-AND-POLISH-V2 §4.2: a one-time-per-session
+     hint that the rail is interactive, drawn in once and faded, never
+     re-shown once the visitor proves they've found it (any click, key, or
+     hover stops it — see the component). */
+  .rail-select__coach-mark {
+    animation: rail-select-coach-mark-in var(--duration-ignition) var(--ease-ignition);
+  }
+  @keyframes rail-select-coach-mark-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
   /* Title block — §7.2: a hairline-bordered strip of labelled cells,
      modelled on the title block of an engineering drawing. */
@@ -571,6 +586,16 @@ html[lang="en"] body {
     to {
       opacity: 1;
     }
+  }
+  /* Mobile assembly (<1024px, FIX-AND-POLISH-V2 §2.3) — a single short
+     vertical tick between stacked members, not the desktop's angled
+     radiating lines, which have no sensible small-screen equivalent. */
+  .assembly-mobile-tick {
+    display: block;
+    margin-inline-start: 2rem;
+    inline-size: 1px;
+    block-size: var(--spacing-l);
+    background: var(--color-border);
   }
 
   /* Work conveyor — FIX-AND-POLISH-V1 §2.3. A carriage riding a literal

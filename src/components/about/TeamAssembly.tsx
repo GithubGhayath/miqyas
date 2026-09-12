@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Locale, TeamMember } from '@/content/types';
 import { pick } from '@/lib/pick';
 import { useDirection } from '@/hooks/useDirection';
@@ -16,6 +17,18 @@ import { TitleBlock } from '@/components/ui/TitleBlock';
  * symmetric wheel. Recomposes three mechanics that already exist elsewhere
  * on the site (ignition, duotone-to-colour, line-draw) instead of
  * inventing a fourth.
+ *
+ * FIX-AND-POLISH-V2 §2: the radiating hub-and-spoke geometry is desktop-
+ * only (≥1024px) — below that it renders as a plain vertical column with
+ * no attempt to preserve the geometry (§2.3). The hover-triggered
+ * expand/collapse flicker from round 1 was the textbook cause: the
+ * `:hover`/`mouseenter` target was the button that *itself* grows on
+ * hover (a flex column sized to its now-larger portrait child), so the
+ * pointer could end up outside the grown button, firing `mouseleave`,
+ * shrinking it back under the pointer, re-firing `mouseenter` — a loop.
+ * The hover trigger now lives on the outer `data-assembly-node` wrapper,
+ * which is absolutely positioned at a fixed point and never itself
+ * changes size; only its children animate.
  */
 
 // Deliberately irregular — not evenly spaced around the hub (§4's
@@ -45,8 +58,10 @@ function quadrant(pos: { x: number; y: number }) {
 
 export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Locale }) {
   const { dir } = useDirection();
+  const tAbout = useTranslations('about');
   const baseId = useId();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [mobileActiveId, setMobileActiveId] = useState<string | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -100,7 +115,11 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
           {nodes.map(({ member }) => (
             <li key={member.id} className="flex flex-col gap-[var(--spacing-2xs)] border border-border p-[var(--spacing-s)]">
               <div className="relative h-20 w-20 overflow-hidden rounded-full border border-border">
-                <Image src={member.portrait.src} alt="" fill sizes="80px" className="object-cover" />
+                {/* priority: native lazy-loading never fires its
+                    intersection check for a `fill` image nested this many
+                    `absolute`/`relative` layers deep — see BeforeAfter.tsx
+                    for how this was confirmed. */}
+                <Image src={member.portrait.src} alt="" fill priority sizes="80px" className="object-cover" />
               </div>
               <TitleBlock cells={[{ label: pick(member.role, locale), value: pick(member.name, locale) }]} />
               <p className="text-ink-2">{pick(member.contribution, locale)}</p>
@@ -113,7 +132,47 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
 
   return (
     <div className="frame">
-      <div className="assembly relative w-full" style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}>
+      {/* Mobile / tablet (<1024px): a plain vertical column — the
+          radiating hub-and-spoke geometry is a desktop-only device with no
+          sensible small-screen equivalent (§2.3), not something to scale
+          down. Duotone-to-colour still applies; tap replaces hover. */}
+      <div className="flex flex-col gap-[var(--spacing-l)] lg:hidden">
+        <p className="measure-block text-ink-2">{tAbout('teamIntro')}</p>
+        {nodes.map(({ member }, index) => {
+          const expanded = mobileActiveId === member.id;
+          return (
+            <div key={member.id}>
+              {/* A short vertical tick between stacked members, not the
+                  angled radiating lines — the dimension-rule visual
+                  language, scaled to what a single column can carry. */}
+              {index > 0 ? <span className="assembly-mobile-tick" aria-hidden="true" /> : null}
+              <button
+                type="button"
+                aria-expanded={expanded}
+                className="flex w-full items-center gap-[var(--spacing-s)] text-start"
+                onClick={() => setMobileActiveId((current) => (current === member.id ? null : member.id))}
+              >
+                <div
+                  className={`duotone duotone-fade relative h-16 w-16 flex-none overflow-hidden rounded-full border-2 border-void${
+                    expanded ? ' is-revealed' : ''
+                  }`}
+                >
+                  <Image src={member.portrait.src} alt="" fill priority sizes="64px" className="object-cover" />
+                </div>
+                <TitleBlock cells={[{ label: pick(member.role, locale), value: pick(member.name, locale) }]} />
+              </button>
+              {expanded ? (
+                <p className="mt-[var(--spacing-2xs)] ps-[calc(4rem+var(--spacing-s))] text-ink-2">
+                  {pick(member.contribution, locale)}
+                </p>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop (≥1024px): the radiating assembly. */}
+      <div className="assembly relative hidden w-full lg:block" style={{ aspectRatio: '16 / 10', minBlockSize: '30rem' }}>
         <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {nodes.map(({ member, pos }) => {
             const active = activeId === member.id;
@@ -149,6 +208,11 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
               data-assembly-node
               className="absolute"
               style={{ insetInlineStart: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)' }}
+              onMouseEnter={() => window.matchMedia('(pointer: fine)').matches && setActiveId(member.id)}
+              onMouseLeave={() =>
+                window.matchMedia('(pointer: fine)').matches &&
+                setActiveId((current) => (current === member.id ? null : current))
+              }
             >
               <button
                 ref={(el) => {
@@ -162,11 +226,6 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                 onKeyDown={(event) => onKeyDown(event, index)}
                 onFocus={() => setActiveId(member.id)}
                 onBlur={() => setActiveId((current) => (current === member.id ? null : current))}
-                onMouseEnter={() => window.matchMedia('(pointer: fine)').matches && setActiveId(member.id)}
-                onMouseLeave={() =>
-                  window.matchMedia('(pointer: fine)').matches &&
-                  setActiveId((current) => (current === member.id ? null : current))
-                }
                 onClick={() => {
                   if (window.matchMedia('(pointer: fine)').matches) return;
                   setActiveId((current) => (current === member.id ? null : member.id));
@@ -182,6 +241,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                     src={member.portrait.src}
                     alt=""
                     fill
+                    priority
                     sizes={active ? '(min-width: 768px) 176px, 112px' : '(min-width: 768px) 96px, 64px'}
                     className="object-cover"
                   />
@@ -195,7 +255,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                 <div
                   id={panelId}
                   role="group"
-                  className="assembly-panel absolute z-10 w-56 border border-border bg-void p-[var(--spacing-s)] text-start"
+                  className="assembly-panel pointer-events-none absolute z-10 w-56 border border-border bg-void p-[var(--spacing-s)] text-start"
                   style={
                     {
                       [horizontal === 'end' ? 'insetInlineStart' : 'insetInlineEnd']: 'calc(100% + var(--spacing-s))',
