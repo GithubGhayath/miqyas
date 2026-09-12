@@ -67,6 +67,7 @@ function EquipmentTable({ equipment, locale, heading }: { equipment: EquipmentRo
 export function EquipmentSection({ equipment, locale, heading }: { equipment: EquipmentRow[]; locale: Locale; heading: string }) {
   const [view, setView] = useState<'table' | 'diagram'>('table');
   const viewLabels = locale === 'ar' ? { table: 'جدول', diagram: 'رسم تفكيكي' } : { table: 'Table', diagram: 'Diagram' };
+  const coachMarkCaption = locale === 'ar' ? 'انقر للتبديل بين الجدول والرسم التفكيكي' : 'Click to switch between table and diagram';
 
   return (
     <>
@@ -77,6 +78,7 @@ export function EquipmentSection({ equipment, locale, heading }: { equipment: Eq
         <RailSelect
           role="tablist"
           ariaLabel={heading}
+          coachMarkCaption={coachMarkCaption}
           activeId={view}
           onChange={(id) => setView(id as 'table' | 'diagram')}
           options={[

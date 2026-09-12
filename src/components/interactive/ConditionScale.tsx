@@ -17,6 +17,7 @@ export function ConditionScale({ grades }: { grades: ConditionGrade[] }) {
     <RailSelect
       role="radiogroup"
       ariaLabel={tGrade('label')}
+      coachMarkCaption={tGrade('coachMark')}
       activeId={activeId}
       onChange={setActiveId}
       options={grades.map((g) => ({
@@ -29,7 +30,10 @@ export function ConditionScale({ grades }: { grades: ConditionGrade[] }) {
         if (!active) return null;
         return (
           <div className="grid grid-cols-1 gap-[var(--spacing-m)] md:grid-cols-[minmax(0,320px)_1fr] md:items-start">
-            <MediaFigure image={active.image} sizes="(min-width: 768px) 320px, 100vw" />
+            {/* priority: this panel remounts on every RailSelect selection
+                change (including autoplay) — see BeforeAfter.tsx for the
+                broader native-lazy-loading issue this avoids. */}
+            <MediaFigure image={active.image} priority sizes="(min-width: 768px) 320px, 100vw" />
             <div className="flex flex-col gap-[var(--spacing-xs)]">
               <div className="flex items-center gap-[var(--spacing-s)]">
                 <GradeChip grade={active.grade} label={tGrade('label')} />

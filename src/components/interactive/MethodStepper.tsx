@@ -17,6 +17,7 @@ export function MethodStepper({ phases }: { phases: MethodPhase[] }) {
     <RailSelect
       role="tablist"
       ariaLabel={tMethod('phasesHeading')}
+      coachMarkCaption={tMethod('phasesCoachMark')}
       activeId={active}
       onChange={setActive}
       options={phases.map((phase) => ({

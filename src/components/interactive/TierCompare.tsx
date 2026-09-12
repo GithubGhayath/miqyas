@@ -21,6 +21,7 @@ export function TierCompare({ rows }: { rows: AssessmentTierRow[] }) {
         <RailSelect
           role="radiogroup"
           ariaLabel={tMethod('tiersHeading')}
+          coachMarkCaption={tMethod('tiersCoachMark')}
           activeId={tier}
           onChange={(id) => setTier(id as Tier)}
           options={[
