@@ -20,6 +20,7 @@ export function WorkFilmTile({
   locale,
   featured,
   expanded,
+  previewed = false,
   verticalOffset,
   onToggle,
 }: {
@@ -27,6 +28,10 @@ export function WorkFilmTile({
   locale: Locale;
   featured: boolean;
   expanded: boolean;
+  /** Discoverability auto-preview (see WorkFilmReel) — a brief colour
+   *  reveal taking its turn until the visitor proves they've found the
+   *  interaction, same treatment as `expanded` minus the detail panel. */
+  previewed?: boolean;
   verticalOffset: number;
   onToggle: () => void;
 }) {
@@ -53,7 +58,7 @@ export function WorkFilmTile({
         className="film-tile__hit absolute inset-0 z-10 h-full w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-focus"
         onClick={onToggle}
       />
-      <div className={`duotone duotone-fade film-tile__cover absolute inset-0${expanded ? ' is-revealed' : ''}`}>
+      <div className={`duotone duotone-fade film-tile__cover absolute inset-0${expanded || previewed ? ' is-revealed' : ''}`}>
         <Image
           src={caseStudy.cover.src}
           alt={t(caseStudy.cover.alt)}

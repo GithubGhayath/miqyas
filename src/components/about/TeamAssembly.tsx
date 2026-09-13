@@ -11,6 +11,8 @@ import { useDirection } from '@/hooks/useDirection';
 import { respectsReducedMotion } from '@/lib/ignition';
 import { springSettled, springSnappy } from '@/lib/motion';
 import { TitleBlock } from '@/components/ui/TitleBlock';
+import { CoachMark } from '@/components/ui/CoachMark';
+import { useDiscoverabilityHint } from '@/hooks/useDiscoverabilityHint';
 
 /**
  * "The Cluster" — full replacement of the hub-and-spoke Assembly
@@ -75,6 +77,18 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
     () => team.slice(0, 6).map((member, index) => ({ member, slot: LAYOUT[index] ?? LAYOUT[LAYOUT.length - 1] })),
     [team],
   );
+
+  // Nothing signalled that a portrait was clickable (reported directly:
+  // "the user will not notice he should click on a member"). Same fix as
+  // RailSelect's own discoverability problem, reused rather than
+  // reinvented: an auto-cycling preview (each portrait takes a turn
+  // resolving to colour) plus a one-time coach-mark, both permanently
+  // stopped by the first real hover/click/focus.
+  const { triggerRef: hintRef, previewIndex, showCoachMark, stop: stopHint } = useDiscoverabilityHint({
+    sessionKey: 'miqyas:cluster-hint-seen',
+    itemCount: nodes.length,
+    disabled: reduceMotion,
+  });
 
   // §2.4 — magnetic cursor reactivity. One pointermove listener on the
   // whole cluster (not one per portrait) computes every portrait's
@@ -184,16 +198,27 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
   }
 
   return (
-    <div className="frame">
+    <div
+      className="frame"
+      ref={(el) => {
+        hintRef.current = el;
+      }}
+    >
       {/* Mobile / tablet (<1024px): a single column — the overlapping
           collage geometry is a desktop-only device (§2.6), not something
           to compress. Tap opens the identical focus interaction: the row
           expands with the detail content and every other row dims. */}
       <p className="measure-block mb-[var(--spacing-m)] text-ink-2 lg:hidden">{tAbout('teamIntro')}</p>
+      {showCoachMark ? (
+        <div className="mb-[var(--spacing-s)] lg:hidden">
+          <CoachMark caption={tAbout('clusterCoachMark')} />
+        </div>
+      ) : null}
       <ul className="flex flex-col gap-[var(--spacing-s)] lg:hidden" role="list">
-        {nodes.map(({ member }) => {
+        {nodes.map(({ member }, index) => {
           const expanded = focusedId === member.id;
           const dimmed = focusedId !== null && !expanded;
+          const previewed = !focusedId && previewIndex === index;
           return (
             <li
               key={member.id}
@@ -203,11 +228,14 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                 type="button"
                 aria-expanded={expanded}
                 className="flex w-full items-center gap-[var(--spacing-s)] text-start"
-                onClick={() => toggleFocus(member.id)}
+                onClick={() => {
+                  stopHint();
+                  toggleFocus(member.id);
+                }}
               >
                 <div
                   className={`duotone duotone-fade relative h-16 w-16 flex-none overflow-hidden rounded-md border-2 border-void${
-                    expanded ? ' is-revealed' : ''
+                    expanded || previewed ? ' is-revealed' : ''
                   }`}
                 >
                   <Image src={member.portrait.src} alt="" fill priority sizes="64px" className="object-cover" />
@@ -232,23 +260,33 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
         })}
       </ul>
 
-      {/* Desktop (≥1024px): the cluster. */}
-      <div
-        ref={clusterRef}
-        className="cluster relative hidden w-full overflow-hidden border border-border lg:block"
-        style={{ aspectRatio: '16 / 11', minBlockSize: '32rem' }}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) setFocusedId(null);
-        }}
-      >
-        <span className="cluster__corner cluster__corner--tl" aria-hidden="true" />
-        <span className="cluster__corner cluster__corner--br" aria-hidden="true" />
+      {/* Desktop (≥1024px): the cluster. Wrapped in its own `relative` box
+          so the coach-mark (positioned just above the cluster's own
+          top edge) isn't clipped by `.cluster`'s own overflow-hidden. */}
+      <div className="relative hidden lg:block">
+        {showCoachMark ? (
+          <div className="absolute -top-9 start-4 z-40">
+            <CoachMark caption={tAbout('clusterCoachMark')} />
+          </div>
+        ) : null}
+        <div
+          ref={clusterRef}
+          className="cluster relative w-full overflow-hidden border border-border"
+          style={{ aspectRatio: '16 / 11', minBlockSize: '32rem' }}
+          onMouseEnter={stopHint}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setFocusedId(null);
+          }}
+        >
+          <span className="cluster__corner cluster__corner--tl" aria-hidden="true" />
+          <span className="cluster__corner cluster__corner--br" aria-hidden="true" />
 
-        {nodes.map(({ member, slot }, index) => {
-          const focused = focusedId === member.id;
-          const hovered = hoveredId === member.id && !focusedId;
-          const dimmed = focusedId !== null && !focused;
-          const panelId = `${baseId}-panel-${member.id}`;
+          {nodes.map(({ member, slot }, index) => {
+            const focused = focusedId === member.id;
+            const hovered = hoveredId === member.id && !focusedId;
+            const previewed = !focusedId && !hovered && previewIndex === index;
+            const dimmed = focusedId !== null && !focused;
+            const panelId = `${baseId}-panel-${member.id}`;
           return (
             <div
               key={member.id}
@@ -290,13 +328,20 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                   aria-label={`${pick(member.name, locale)} — ${pick(member.role, locale)}`}
                   className="cluster-portrait-btn group relative block w-full focus-visible:outline-2 focus-visible:outline-focus"
                   onKeyDown={(event) => onKeyDown(event, index)}
-                  onMouseEnter={() => setHoveredId(member.id)}
+                  onMouseEnter={() => {
+                    stopHint();
+                    setHoveredId(member.id);
+                  }}
                   onMouseLeave={() => setHoveredId((current) => (current === member.id ? null : current))}
-                  onClick={() => toggleFocus(member.id)}
+                  onFocus={stopHint}
+                  onClick={() => {
+                    stopHint();
+                    toggleFocus(member.id);
+                  }}
                 >
                   <div
                     className={`duotone duotone-fade cluster-portrait relative aspect-square w-full overflow-hidden rounded-md border-2 border-void transition-[filter] duration-300 ${
-                      hovered || focused ? 'is-revealed' : ''
+                      hovered || focused || previewed ? 'is-revealed' : ''
                     }`}
                     style={{
                       filter: dimmed ? 'blur(4px)' : !focused && !hovered ? `saturate(${1 - slot.depth * 0.5})` : undefined,
@@ -350,6 +395,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
             </m.div>
           ) : null}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );

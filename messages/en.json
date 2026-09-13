@@ -91,7 +91,8 @@
     "expandDetails": "Show details",
     "collapseDetails": "Hide details",
     "provesHeading": "What this proves",
-    "viewFullCaseStudy": "Read the full report"
+    "viewFullCaseStudy": "Read the full report",
+    "reelCoachMark": "Drag to explore — click a cover for details"
   },
   "notes": {
     "title": "Field Notes",
@@ -104,6 +105,7 @@
     "teamHeading": "Team",
     "teamIntro": "Six people, one methodology. Tap a member to read what they do.",
     "closeFocus": "Close",
+    "clusterCoachMark": "Click a portrait to read their bio",
     "unknownHeading": "How we handle what we don't know",
     "unknownBody": "First reports are reviewed by an independent senior engineer before delivery, and scope limits are written on page one of every report.",
     "faqHeading": "Frequently asked questions"

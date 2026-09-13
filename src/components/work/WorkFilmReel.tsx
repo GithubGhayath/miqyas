@@ -10,6 +10,8 @@ import { useDirection } from '@/hooks/useDirection';
 import { respectsReducedMotion } from '@/lib/ignition';
 import { spikeInstrumentTrace } from '@/lib/instrumentTrace';
 import { WorkFilmTile } from '@/components/work/WorkFilmTile';
+import { CoachMark } from '@/components/ui/CoachMark';
+import { useDiscoverabilityHint } from '@/hooks/useDiscoverabilityHint';
 
 gsap.registerPlugin(Draggable, InertiaPlugin);
 
@@ -45,6 +47,19 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
     () => caseStudies.map((_, i) => (i % 3 === 0 ? 0 : i % 3 === 1 ? 22 : -14)),
     [caseStudies],
   );
+
+  // Nothing signalled a cover was clickable (reported directly: "the user
+  // will not notice he should click on a project image"). Same fix as the
+  // Team Cluster's identical problem, reused rather than reinvented: an
+  // auto-cycling colour preview plus a one-time coach-mark (which also
+  // covers the drag interaction in its caption, since that's the other
+  // thing nothing here signals), both stopped permanently by the first
+  // real drag/click/keyboard use.
+  const { triggerRef: hintRef, previewIndex, showCoachMark, stop: stopHint } = useDiscoverabilityHint({
+    sessionKey: 'miqyas:reel-hint-seen',
+    itemCount: caseStudies.length,
+    disabled: reduceMotion,
+  });
 
   function computeBounds() {
     const track = trackRef.current;
@@ -93,6 +108,7 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
       allowNativeTouchScrolling: false,
       cursor: 'grab',
       activeCursor: 'grabbing',
+      onPress: stopHint,
       onDragEnd: reduceMotion ? handleSettle : undefined,
       onThrowComplete: !reduceMotion ? handleSettle : undefined,
     });
@@ -143,38 +159,54 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
   function onTrackKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === 'ArrowRight') {
       event.preventDefault();
+      stopHint();
       moveByOne(1);
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
+      stopHint();
       moveByOne(-1);
     }
   }
 
   return (
-    <div className="film-reel relative">
+    <div
+      className="film-reel relative"
+      ref={(el) => {
+        hintRef.current = el;
+      }}
+    >
       {/* §3.6 — the track is also operable without a pointer: visible
           prev/next controls move by one tile, and the track itself
           accepts arrow keys while focused. */}
       {/* Glyphs point in the direction each button actually navigates, not
           a fixed left/right — in rtl "previous" is toward the physical
           right, so the chevrons swap rather than just the button order. */}
-      <div className="frame mb-[var(--spacing-s)] flex items-center justify-end gap-[var(--spacing-2xs)]">
-        <button
-          type="button"
-          aria-label={tWork('reelPrev')}
-          className="film-reel__nav"
-          onClick={() => moveByOne(-1)}
-        >
-          {dir === 'rtl' ? '›' : '‹'}
-        </button>
-        <button
-          type="button"
-          aria-label={tWork('reelNext')}
-          className="film-reel__nav"
-          onClick={() => moveByOne(1)}
-        >
-          {dir === 'rtl' ? '‹' : '›'}
-        </button>
+      <div className="frame mb-[var(--spacing-s)] flex items-center justify-between gap-[var(--spacing-2xs)]">
+        {showCoachMark ? <CoachMark caption={tWork('reelCoachMark')} /> : <span />}
+        <div className="flex items-center gap-[var(--spacing-2xs)]">
+          <button
+            type="button"
+            aria-label={tWork('reelPrev')}
+            className="film-reel__nav"
+            onClick={() => {
+              stopHint();
+              moveByOne(-1);
+            }}
+          >
+            {dir === 'rtl' ? '›' : '‹'}
+          </button>
+          <button
+            type="button"
+            aria-label={tWork('reelNext')}
+            className="film-reel__nav"
+            onClick={() => {
+              stopHint();
+              moveByOne(1);
+            }}
+          >
+            {dir === 'rtl' ? '‹' : '›'}
+          </button>
+        </div>
       </div>
 
       <div
@@ -184,6 +216,7 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
         role="group"
         aria-label={tWork('title')}
         onKeyDown={onTrackKeyDown}
+        onFocus={stopHint}
         onClick={(event) => {
           if (event.target === containerRef.current) setExpandedId(null);
         }}
@@ -196,8 +229,10 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
               locale={locale}
               featured={index === 0}
               expanded={expandedId === caseStudy.id}
+              previewed={!expandedId && previewIndex === index}
               verticalOffset={verticalOffsets[index] ?? 0}
               onToggle={() => {
+                stopHint();
                 setExpandedId((current) => (current === caseStudy.id ? null : caseStudy.id));
                 spikeInstrumentTrace(1);
               }}

@@ -333,10 +333,11 @@ html[lang="en"] body {
      hint that the rail is interactive, drawn in once and faded, never
      re-shown once the visitor proves they've found it (any click, key, or
      hover stops it — see the component). */
-  .rail-select__coach-mark {
-    animation: rail-select-coach-mark-in var(--duration-ignition) var(--ease-ignition);
+  .rail-select__coach-mark,
+  .coach-mark {
+    animation: coach-mark-in var(--duration-ignition) var(--ease-ignition);
   }
-  @keyframes rail-select-coach-mark-in {
+  @keyframes coach-mark-in {
     from {
       opacity: 0;
     }
