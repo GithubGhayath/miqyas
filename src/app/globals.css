@@ -573,104 +573,78 @@ html[lang="en"] body {
     opacity: 0;
   }
 
-  /* "The Assembly" — FIX-AND-POLISH-V1 §3.2. A shared-methodology hub with
-     a thin dimension-rule line radiating to each member; the line ignites
-     (the same ignition token used everywhere else on the site) when its
-     member is hovered/focused/tapped. */
-  /* A bounded sheet rather than a diagram floating in open space —
-     corner brackets matching .carriage__corner (Work conveyor) and a
-     faint measurement grid, so the empty canvas reads as "measured",
-     not accidental. */
-  .assembly--framed {
+  /* "The Cluster" — creative-layout-replacement §2. A composed, irregular,
+     overlapping collage of portraits, not a diagram. Corner brackets reuse
+     the exact .carriage__corner language from the Work conveyor so the two
+     rebuilt sections read as one system. */
+  .cluster {
     background-image:
       linear-gradient(color-mix(in srgb, var(--color-border) 45%, transparent) 1px, transparent 1px),
       linear-gradient(90deg, color-mix(in srgb, var(--color-border) 45%, transparent) 1px, transparent 1px);
     background-size: 40px 40px;
     background-position: center;
   }
-  .assembly__corner {
+  .cluster__corner {
     position: absolute;
     inline-size: 18px;
     block-size: 18px;
     pointer-events: none;
-    z-index: 1;
+    z-index: 25;
   }
-  .assembly__corner--tl {
+  .cluster__corner--tl {
     top: -1px;
     inset-inline-start: -1px;
     border-block-start: 2px solid var(--color-signal);
     border-inline-start: 2px solid var(--color-signal);
   }
-  .assembly__corner--br {
+  .cluster__corner--br {
     bottom: -1px;
     inset-inline-end: -1px;
     border-block-end: 2px solid var(--color-signal);
     border-inline-end: 2px solid var(--color-signal);
   }
-  .assembly-hub {
-    inline-size: 2.5em;
-    block-size: 2.5em;
-    border-radius: 50%;
-    background: var(--color-signal);
-    box-shadow:
-      0 0 0 4px var(--color-void),
-      0 0 0 5px var(--color-border);
-    z-index: 1;
-    /* Task 2.4 (creative-enhancement-pass) — a slow, barely-perceptible
-       independent float, so the hub reads as sitting at a different depth
-       than the flat plane of member nodes around it. cubic-bezier below
-       is the standard sine-ease-in-out approximation (GSAP's
-       `sine.inOut`), not a new easing invented for this one animation. */
-    animation: assembly-hub-drift 11s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate;
+  /* The slot owns position/size (transitions on React state change) and
+     idle drift (CSS keyframes, per-portrait phase/duration via custom
+     properties set inline) — never both onto the same instant, since the
+     transition only fires when inset/size actually change. */
+  .cluster-slot {
+    transition:
+      inset-inline-start 0.6s var(--ease-standard),
+      top 0.6s var(--ease-standard),
+      inset-block-end 0.6s var(--ease-standard),
+      inline-size 0.6s var(--ease-standard);
   }
-  @keyframes assembly-hub-drift {
-    from {
-      transform: translate(-50%, -50%);
+  .cluster-slot--drift {
+    animation: cluster-drift var(--drift-duration, 9s) ease-in-out infinite;
+    animation-delay: var(--drift-delay, 0s);
+  }
+  @keyframes cluster-drift {
+    0%,
+    100% {
+      transform: translate(0, 0);
     }
-    to {
-      transform: translate(-50%, calc(-50% - 3px));
+    50% {
+      transform: translate(var(--drift-x, 5px), var(--drift-y, -6px));
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .assembly-hub {
+    .cluster-slot--drift {
       animation: none;
-      transform: translate(-50%, -50%);
     }
   }
-  .assembly-line {
-    stroke: var(--color-ink-3);
-    stroke-width: 1.25;
-    transition:
-      stroke var(--duration-ignition) var(--ease-ignition),
-      stroke-width var(--duration-ignition) var(--ease-ignition);
-  }
-  .assembly-line--active {
-    stroke: var(--color-signal);
-    stroke-width: 2;
-  }
-  .assembly-node {
+  .cluster-portrait-btn {
     cursor: pointer;
   }
-  .assembly-panel {
-    animation: assembly-panel-in var(--duration-ignition) var(--ease-ignition);
+  .cluster-portrait__tag {
+    inset-inline-start: var(--spacing-2xs);
+    border: 1px solid var(--color-border);
+    white-space: nowrap;
   }
-  @keyframes assembly-panel-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  .cluster-panel {
+    box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--color-ink) 25%, transparent);
   }
-  /* Mobile assembly (<1024px, FIX-AND-POLISH-V2 §2.3) — a single short
-     vertical tick between stacked members, not the desktop's angled
-     radiating lines, which have no sensible small-screen equivalent. */
-  .assembly-mobile-tick {
-    display: block;
-    margin-inline-start: 2rem;
-    inline-size: 1px;
-    block-size: var(--spacing-l);
-    background: var(--color-border);
+  .cluster-mobile-row {
+    will-change: opacity, filter;
   }
 
   /* Work conveyor — FIX-AND-POLISH-V1 §2.3. A carriage riding a literal
