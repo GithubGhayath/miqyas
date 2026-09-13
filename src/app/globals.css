@@ -492,11 +492,15 @@ html[lang="en"] body {
     }
   }
 
-  /* Instrument trace — FIX-AND-POLISH-V3 §5.3: a continuous oscilloscope
-     line in the margin opposite `.sheet-margin`, fixed to the viewport
-     (not the document) so it always reads the current moment rather than
-     scrolling away with the page. Desktop-only, matching the Work
-     conveyor's own breakpoint — see InstrumentTrace.tsx for why. */
+  /* Instrument trace — FIX-AND-POLISH-V3 §5.3, extended into a page ruler
+     by creative-layout-replacement §4: a continuous oscilloscope line in
+     the margin opposite `.sheet-margin`, fixed to the viewport (not the
+     document) so it always reads the current moment rather than scrolling
+     away with the page, PLUS fixed section tick marks and a travelling
+     position dot layered on top. `inset-inline-end` — already correct
+     before this pass, confirmed live — is what puts it on the trailing
+     margin (right in `ltr`, left in `rtl`), never a hardcoded side.
+     Desktop-only, matching the Work section's own breakpoint. */
   .instrument-trace {
     display: none;
     position: fixed;
@@ -505,13 +509,59 @@ html[lang="en"] body {
     bottom: 0;
     inline-size: 24px;
     block-size: 100dvh;
-    opacity: 0.4;
     pointer-events: none;
     z-index: 1;
   }
   @media (min-width: 64rem) {
     .instrument-trace {
       display: block;
+    }
+  }
+  .instrument-trace__wave {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    opacity: 0.4;
+  }
+  .instrument-trace__tick {
+    position: absolute;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+  }
+  .instrument-trace__tick-line {
+    inline-size: 10px;
+    block-size: 1px;
+    background: var(--color-ink-3);
+    opacity: 0.6;
+  }
+  .instrument-trace__tick-label {
+    position: absolute;
+    inset-inline-end: calc(100% + var(--spacing-3xs));
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--color-ink-3);
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    opacity: 0.7;
+  }
+  .instrument-trace__dot {
+    position: absolute;
+    inset-inline-start: 50%;
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: var(--color-signal);
+    box-shadow: 0 0 6px 1px color-mix(in srgb, var(--color-signal) 70%, transparent);
+    transform: translate(-50%, -50%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .instrument-trace__dot {
+      box-shadow: none;
     }
   }
 
@@ -647,96 +697,67 @@ html[lang="en"] body {
     will-change: opacity, filter;
   }
 
-  /* Work conveyor — FIX-AND-POLISH-V1 §2.3. A carriage riding a literal
-     rail: `.conveyor__rail` is the continuous line the full length of the
-     track, `.carriage__rail-tick` drops each card down onto it. Both are
-     positioned against the same fixed carriage height (480px, desktop-only
-     so a fixed pixel value is fine — no need for a responsive calc). */
-  .conveyor__rail {
-    position: absolute;
-    top: calc(50% + 264px);
-    inset-inline: 0;
-    block-size: 1px;
-    background: var(--color-border);
+  /* "Drag Film Reel" — creative-layout-replacement §3, full replacement of
+     the scroll-linked pinned conveyor. gsap Draggable owns the track's
+     transform entirely; these rules are visual only. */
+  .film-reel__viewport {
+    cursor: grab;
   }
-  .carriage__rail-tick {
-    position: absolute;
-    bottom: -24px;
-    inset-inline-start: 50%;
-    inline-size: 1px;
-    block-size: 24px;
-    background: var(--color-border);
-    transform: translateX(-50%);
+  .film-reel__track {
+    will-change: transform;
   }
-  .carriage__corner {
+  .film-reel__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: 1px solid var(--color-border);
+    font-size: var(--step-2);
+    line-height: 1;
+    color: var(--color-ink-2);
+    transition:
+      color var(--duration-ignition) var(--ease-ignition),
+      border-color var(--duration-ignition) var(--ease-ignition);
+  }
+  .film-reel__nav:hover,
+  .film-reel__nav:focus-visible {
+    color: var(--color-ink);
+    border-color: var(--color-signal);
+  }
+  .film-tile {
+    touch-action: pan-y;
+  }
+  .film-tile__hit {
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .film-tile__corner {
     position: absolute;
     inline-size: 16px;
     block-size: 16px;
     pointer-events: none;
+    z-index: 5;
   }
-  .carriage__corner--tl {
+  .film-tile__corner--tl {
     top: -1px;
     inset-inline-start: -1px;
     border-block-start: 2px solid var(--color-signal);
     border-inline-start: 2px solid var(--color-signal);
   }
-  .carriage__corner--br {
+  .film-tile__corner--br {
     bottom: -1px;
     inset-inline-end: -1px;
     border-block-end: 2px solid var(--color-signal);
     border-inline-end: 2px solid var(--color-signal);
   }
-
-  /* Task 3.3 (creative-enhancement-pass) — the cross-section reveal.
-     `.carriage__cross-section-image` reuses the SVG edge-detection filter
-     defined once in WorkConveyor.tsx (`#carriage-technical-edge`) rather
-     than a second per-carriage copy; `screen` blend drops the filter's
-     near-black background and keeps only its bright edge lines, so it
-     reads as a line-diagram sitting over the real photo, not a second
-     opaque photo. */
-  .carriage__cross-section-image {
-    filter: url(#carriage-technical-edge);
-    mix-blend-mode: screen;
-  }
-  .carriage__sweep-line {
-    position: absolute;
-    inset-inline: 0;
-    top: 0;
-    block-size: 2px;
-    background: var(--color-signal);
-    box-shadow: 0 0 8px 1px var(--color-signal);
-    opacity: 0;
-  }
-
-  /* Task 3.1 (creative-enhancement-pass) — the conveyor's read-only
-     progress rail. Fixed near the bottom of the pinned section (the
-     track above it is h-screen, so this has to be taken out of flow to
-     sit on screen rather than pushed below the fold). */
-  .work-progress-rail {
-    position: absolute;
-    inset-inline: 0;
-    bottom: var(--spacing-xl);
-    z-index: 5;
-  }
-
-  /* Work conveyor detail strip — FIX-AND-POLISH-V3 §5.2. Cross-fades in
-     on a fresh key every time the active case study changes, the same
-     technique already used for the RailSelect coach-mark. */
-  .work-detail {
-    animation: work-detail-fade-in var(--duration-ignition) var(--ease-ignition);
-  }
-  @keyframes work-detail-fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  .work-detail__quote {
+  .film-tile__quote {
     position: relative;
-    padding-inline-start: var(--spacing-m);
+    padding-inline-start: var(--spacing-s);
     border-inline-start: 2px solid var(--color-signal);
+  }
+  .film-tile--expanded {
+    z-index: 15;
   }
 
   /* Exploded-view equipment diagram — FIX-AND-POLISH-V1 §2.3: the short

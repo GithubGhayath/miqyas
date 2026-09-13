@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { usePathname } from '@/i18n/navigation';
 import { respectsReducedMotion } from '@/lib/ignition';
 import { onInstrumentSpike } from '@/lib/instrumentTrace';
 
@@ -14,36 +15,111 @@ const CENTER = WIDTH / 2;
 const AMPLITUDE_MAX = 16;
 const SPIKE_DECAY = 0.9;
 const NOISE_SPEED = 0.015;
+const BASE_STROKE = 1;
+const MAX_STROKE = 2.6;
+
+interface TickMark {
+  id: string;
+  fraction: number; // 0-1, this section's vertical centre / total document height
+  label: string;
+}
 
 /**
- * The instrument trace — FIX-AND-POLISH-V3 §5.3. One continuous
- * oscilloscope-style line running the full height of the viewport in the
- * margin opposite `SheetMargin`, "recorded" by a ring buffer of samples
- * shifted one step per animation frame so the whole page reads as a
- * single unbroken reading rather than something that redraws or restarts
- * per scroll position.
+ * The instrument trace — creative-layout-replacement §4, building on
+ * FIX-AND-POLISH-V3 §5.3 rather than replacing its scroll-scrub/spike
+ * logic (explicitly out of scope per the brief).
  *
- * Base amplitude comes from scroll velocity, read off a real GSAP
- * `scrub`bed tween spanning the full document height (not a bare
- * ScrollTrigger.create with no animation — `scrub` only means something
- * attached to a tween's playhead). On top of that, three unrelated site
- * mechanics call `spikeInstrumentTrace()` at their own existing
- * "something just resolved" moment — a condition grade settling on a
- * reading (ConditionScale), a section reaching full focus
- * (CameraMoveSections), a work-conveyor selection change (WorkConveyor)
- * — and this component is the sole listener, adding a decaying boost.
+ * §4.1.A ("fixed to the literal right edge regardless of language") was
+ * checked against the real rule before touching anything: it already used
+ * `inset-inline-end` (a logical property, confirmed live in an earlier
+ * session — it renders on the physical left in `rtl`), not `right`. No
+ * fix was needed there; left as-is rather than "fixing" something that
+ * wasn't broken.
  *
- * Desktop-only (≥1024px, the Work conveyor's own breakpoint) — a density
- * detail, not something to fight for space with on mobile (hidden via
- * CSS, see .instrument-trace in globals.css). Under reduced motion it
- * renders as a single flat static line: no ticker, no scroll listener,
- * no spikes.
+ * §4.1.B is genuinely new: the trace now doubles as a page ruler layered
+ * on top of the existing live "recording" —
+ *  - Section tick marks: every top-level <section> on the current page
+ *    gets a fixed mark positioned at its own scroll fraction, with a
+ *    short mono index label (an actual page name, not a fixed six-item
+ *    list — this is a multi-page site, not the single scrolling page the
+ *    brief's "Home/Services/Method/Work/Notes/About" phrasing assumes;
+ *    marking this page's own sections is the honest equivalent).
+ *  - A travelling dot at the current scroll fraction, precise position
+ *    rather than just amplitude.
+ *  - Stroke width now varies with the same spike value that already
+ *    drives amplitude, settling back to a thin baseline.
  */
 export function InstrumentTrace() {
+  const pathname = usePathname();
   const polylineRef = useRef<SVGPolylineElement>(null);
+  const dotRef = useRef<HTMLSpanElement>(null);
   const velocityRef = useRef(0);
+  const progressRef = useRef(0);
   const spikeRef = useRef(0);
   const phaseRef = useRef(0);
+  const [ticks, setTicks] = useState<TickMark[]>([]);
+
+  // Tick discovery — recomputed per route (client-side navigation keeps
+  // this component mounted; the page underneath it changes). Waits for
+  // `load` for the same reason CameraMoveSections does: mutating/reading
+  // layout before every Suspense boundary has settled races the page's
+  // own hydration reveal.
+  useEffect(() => {
+    // Static, informational marks — not decorative motion — so these
+    // compute regardless of reduced-motion preference.
+    let cancelled = false;
+
+    function measure() {
+      if (cancelled) return;
+      const main = document.getElementById('main');
+      if (!main) return;
+      const sections = Array.from(main.querySelectorAll<HTMLElement>('section'));
+      const totalHeight = document.documentElement.scrollHeight;
+      if (sections.length === 0 || totalHeight === 0) {
+        setTicks([]);
+        return;
+      }
+      setTicks(
+        sections.map((section, index) => {
+          const rect = section.getBoundingClientRect();
+          const centre = rect.top + window.scrollY + rect.height / 2;
+          return { id: `${index}`, fraction: Math.min(1, Math.max(0, centre / totalHeight)), label: `S${String(index + 1).padStart(2, '0')}` };
+        }),
+      );
+    }
+
+    if (document.readyState === 'complete') {
+      requestAnimationFrame(measure);
+    } else {
+      window.addEventListener('load', () => requestAnimationFrame(measure), { once: true });
+    }
+    window.addEventListener('resize', measure);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('resize', measure);
+    };
+  }, [pathname]);
+
+  // Reduced motion: the dot still tracks real scroll position (it reflects
+  // where you are, not decorative motion — kept per the brief), but with a
+  // plain scroll listener, no GSAP ticker, no wave animation, no spikes.
+  useEffect(() => {
+    if (!respectsReducedMotion()) return;
+    const dot = dotRef.current;
+    if (!dot) return;
+    function updateDot() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? window.scrollY / max : 0;
+      dot!.style.top = `${Math.min(1, Math.max(0, progress)) * 100}%`;
+    }
+    updateDot();
+    window.addEventListener('scroll', updateDot, { passive: true });
+    window.addEventListener('resize', updateDot);
+    return () => {
+      window.removeEventListener('scroll', updateDot);
+      window.removeEventListener('resize', updateDot);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     if (respectsReducedMotion()) return;
@@ -63,6 +139,7 @@ export function InstrumentTrace() {
         scrub: 0.3,
         onUpdate: (self) => {
           velocityRef.current = self.getVelocity() / 1000;
+          progressRef.current = self.progress;
         },
       },
     });
@@ -80,6 +157,10 @@ export function InstrumentTrace() {
       samples.shift();
       samples.push(CENTER + Math.max(-AMPLITUDE_MAX, Math.min(AMPLITUDE_MAX, amplitude)));
       el!.setAttribute('points', samples.map((x, i) => `${x.toFixed(2)},${i}`).join(' '));
+      el!.setAttribute('stroke-width', Math.min(MAX_STROKE, BASE_STROKE + spikeRef.current * 0.8).toFixed(2));
+
+      const dot = dotRef.current;
+      if (dot) dot.style.top = `${progressRef.current * 100}%`;
     }
 
     gsap.ticker.add(tick);
@@ -90,25 +171,29 @@ export function InstrumentTrace() {
       tween.kill();
       offSpike();
     };
-  }, []);
+  }, [pathname]);
 
   const flatPoints = Array.from({ length: SAMPLE_COUNT }, (_, i) => `${CENTER},${i}`).join(' ');
 
   return (
-    <svg
-      className="instrument-trace no-print"
-      aria-hidden="true"
-      viewBox={`0 0 ${WIDTH} ${SAMPLE_COUNT}`}
-      preserveAspectRatio="none"
-    >
-      <polyline
-        ref={polylineRef}
-        points={flatPoints}
-        fill="none"
-        stroke="var(--color-signal)"
-        strokeWidth="1"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
+    <div className="instrument-trace no-print" aria-hidden="true">
+      <svg className="instrument-trace__wave" viewBox={`0 0 ${WIDTH} ${SAMPLE_COUNT}`} preserveAspectRatio="none">
+        <polyline
+          ref={polylineRef}
+          points={flatPoints}
+          fill="none"
+          stroke="var(--color-signal)"
+          strokeWidth={BASE_STROKE}
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      {ticks.map((mark) => (
+        <span key={mark.id} className="instrument-trace__tick" style={{ top: `${mark.fraction * 100}%` }}>
+          <span className="instrument-trace__tick-line" />
+          <span className="instrument-trace__tick-label">{mark.label}</span>
+        </span>
+      ))}
+      <span ref={dotRef} className="instrument-trace__dot" />
+    </div>
   );
 }
