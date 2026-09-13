@@ -12,8 +12,8 @@ const TRANSITION_CLASSES: RouteTransitionClass[] = ['nav-forward', 'nav-back', '
  * A locale-aware Link that drives a specific named View Transition (see the
  * `::view-transition-*` rules in globals.css) instead of the browser's
  * default cross-fade. UI-REFACTOR-PROMPT §3.1(b)/(d). Forwards its ref to
- * the underlying `<a>` — some callers (e.g. WorkCarriage) need a DOM
- * reference for their own ScrollTrigger, not just navigation.
+ * the underlying `<a>` — some callers need a DOM reference for their own
+ * ScrollTrigger/Draggable, not just navigation.
  */
 export const TransitionLink = forwardRef<
   HTMLAnchorElement,

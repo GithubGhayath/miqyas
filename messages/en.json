@@ -85,7 +85,13 @@
     "briefHeading": "Brief",
     "sector": "Sector",
     "governorate": "Governorate",
-    "year": "Year"
+    "year": "Year",
+    "reelPrev": "Previous case study",
+    "reelNext": "Next case study",
+    "expandDetails": "Show details",
+    "collapseDetails": "Hide details",
+    "provesHeading": "What this proves",
+    "viewFullCaseStudy": "Read the full report"
   },
   "notes": {
     "title": "Field Notes",

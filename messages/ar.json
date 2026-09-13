@@ -85,7 +85,13 @@
     "briefHeading": "الموجز",
     "sector": "القطاع",
     "governorate": "المحافظة",
-    "year": "السنة"
+    "year": "السنة",
+    "reelPrev": "دراسة الحالة السابقة",
+    "reelNext": "دراسة الحالة التالية",
+    "expandDetails": "عرض التفاصيل",
+    "collapseDetails": "إخفاء التفاصيل",
+    "provesHeading": "ما الذي يثبته هذا",
+    "viewFullCaseStudy": "اقرأ التقرير كاملًا"
   },
   "notes": {
     "title": "ملاحظات ميدانية",

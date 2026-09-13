@@ -4,8 +4,7 @@ import type { Locale } from '@/content/types';
 import { getCaseStudies } from '@/lib/content';
 import { buildMetadata } from '@/lib/metadata';
 import { KineticHeading } from '@/components/motion/KineticHeading';
-import { WorkIndexRow } from '@/components/work/WorkIndexRow';
-import { WorkConveyor } from '@/components/work/WorkConveyor';
+import { WorkFilmReel } from '@/components/work/WorkFilmReel';
 
 export async function generateMetadata({
   params,
@@ -34,21 +33,11 @@ export default async function WorkPage({ params }: { params: Promise<{ locale: s
         </header>
       </div>
 
-      {/* Desktop (≥1024px): the conveyor — FIX-AND-POLISH-V1 §2.3, a
-          horizontally-pinned rail of carriages, replacing the generic
-          cinematic vertical stack with something unmistakably mechanical.
-          Below 1024px the horizontal-pin mechanic fights native touch
-          scroll, so it isn't rendered at all there — a deliberate,
-          documented breakpoint behaviour, not a compromise. */}
-      <WorkConveyor caseStudies={caseStudies} locale={l} />
-
-      {/* Mobile (<1024px) fallback: the previous full-bleed, full-viewport
-          vertical stack, unchanged. */}
-      <div className="bleed lg:hidden" style={{ scrollSnapType: 'y proximity' }}>
-        {caseStudies.map((caseStudy) => (
-          <WorkIndexRow key={caseStudy.id} caseStudy={caseStudy} locale={l} />
-        ))}
-      </div>
+      {/* "Drag Film Reel" (creative-layout-replacement §3) — one
+          click-and-drag/touch-drag track for every viewport size, no
+          separate mobile fallback. Native touch drag already works
+          through gsap Draggable, so there's nothing to branch on. */}
+      <WorkFilmReel caseStudies={caseStudies} locale={l} />
     </div>
   );
 }
