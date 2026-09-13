@@ -155,6 +155,9 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
       {/* §3.6 — the track is also operable without a pointer: visible
           prev/next controls move by one tile, and the track itself
           accepts arrow keys while focused. */}
+      {/* Glyphs point in the direction each button actually navigates, not
+          a fixed left/right — in rtl "previous" is toward the physical
+          right, so the chevrons swap rather than just the button order. */}
       <div className="frame mb-[var(--spacing-s)] flex items-center justify-end gap-[var(--spacing-2xs)]">
         <button
           type="button"
@@ -162,7 +165,7 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
           className="film-reel__nav"
           onClick={() => moveByOne(-1)}
         >
-          ‹
+          {dir === 'rtl' ? '›' : '‹'}
         </button>
         <button
           type="button"
@@ -170,7 +173,7 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
           className="film-reel__nav"
           onClick={() => moveByOne(1)}
         >
-          ›
+          {dir === 'rtl' ? '‹' : '›'}
         </button>
       </div>
 
