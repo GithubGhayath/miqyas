@@ -131,9 +131,52 @@ export function WorkFilmReel({ caseStudies, locale }: { caseStudies: CaseStudy[]
   // Expanding a tile changes the track's total width, so the drag bounds
   // (computed from track.scrollWidth) need to be recalculated — otherwise
   // the reel could be dragged past its real end, or refuse to reach a
-  // newly-revealed edge.
+  // newly-revealed edge. A tile grows in place (same left edge, wider and
+  // taller) rather than the track re-centring around it, so any tile but
+  // the very first routinely ends up with its now-larger right edge
+  // poking past the visible viewport — reported directly: expanding a
+  // tile toward the end of the reel left "a piece of it hidden" by the
+  // screen edge. Once the tile's resize transition (film-tile's
+  // `duration-500`) has settled, nudge the track just far enough that the
+  // whole expanded tile is back inside the viewport, clamped to valid
+  // drag bounds.
   useEffect(() => {
-    draggableRef.current?.applyBounds(computeBounds());
+    const draggable = draggableRef.current;
+    const track = trackRef.current;
+    const container = containerRef.current;
+    if (!draggable || !track || !container) return;
+
+    if (!expandedId) {
+      draggable.applyBounds(computeBounds());
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      draggable.applyBounds(computeBounds());
+
+      const tile = container.querySelector<HTMLElement>(`[data-tile-id="${expandedId}"]`);
+      if (!tile) return;
+      const containerRect = container.getBoundingClientRect();
+      const tileRect = tile.getBoundingClientRect();
+      let delta = 0;
+      if (tileRect.left < containerRect.left) {
+        delta = containerRect.left - tileRect.left;
+      } else if (tileRect.right > containerRect.right) {
+        delta = containerRect.right - tileRect.right;
+      }
+      if (delta === 0) return;
+
+      const bounds = computeBounds();
+      const nextX = gsap.utils.clamp(bounds.minX, bounds.maxX, draggable.x + delta);
+      gsap.to(track, {
+        x: nextX,
+        duration: reduceMotion ? 0 : 0.4,
+        ease: 'power2.out',
+        onUpdate: () => draggable.update(),
+      });
+    }, 520);
+
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expandedId]);
 
