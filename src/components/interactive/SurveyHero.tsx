@@ -23,7 +23,11 @@ const VIEWBOX_W = 800;
 const VIEWBOX_H = 500;
 const CONNECTOR_LENGTH = 28;
 
-const HERO_IMAGE_SRC = 'https://picsum.photos/seed/miqyas-hero-line/1600/1000';
+const HERO_IMAGE_SRC = '/images/hero/production-hall.jpg';
+const HERO_IMAGE_ALT = {
+  ar: 'قاعة إنتاج صناعية مظلمة وصامتة، غير مفحوصة',
+  en: 'A dark, silent industrial production hall, unexamined',
+};
 
 export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
   const { t } = useLocalized();
@@ -115,7 +119,7 @@ export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
         >
           <Image
             src={HERO_IMAGE_SRC}
-            alt=""
+            alt={t(HERO_IMAGE_ALT)}
             fill
             priority
             sizes="100vw"

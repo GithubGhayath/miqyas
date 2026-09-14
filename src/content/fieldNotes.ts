@@ -27,8 +27,11 @@ export const fieldNotes: FieldNote[] = [
       ],
     },
     cover: {
-      src: 'https://picsum.photos/seed/miqyas-note-nameplate/1200/700',
-      alt: { ar: 'لوحة بيانات محرك صناعي', en: 'An industrial motor nameplate' },
+      src: '/images/notes/nameplate.jpg',
+      alt: {
+        ar: 'مقربة لآلية تروس صناعية قديمة الطراز',
+        en: 'A close-up of an old-fashioned industrial gear mechanism',
+      },
       width: 1200,
       height: 700,
     },
@@ -59,8 +62,11 @@ export const fieldNotes: FieldNote[] = [
       ],
     },
     cover: {
-      src: 'https://picsum.photos/seed/miqyas-note-rust/1200/700',
-      alt: { ar: 'صدأ على هيكل معدني صناعي', en: 'Rust on an industrial metal structure' },
+      src: '/images/notes/rust.jpg',
+      alt: {
+        ar: 'مقربة لملمس سطح معدني متآكل بالكامل ومثقوب بالصدأ',
+        en: 'A close-up texture of a heavily corroded metal surface, pitted with rust',
+      },
       width: 1200,
       height: 700,
     },
@@ -89,8 +95,11 @@ export const fieldNotes: FieldNote[] = [
       ],
     },
     cover: {
-      src: 'https://picsum.photos/seed/miqyas-note-caretaker/1200/700',
-      alt: { ar: 'محادثة ميدانية مع حارس منشأة', en: 'A field interview with a facility caretaker' },
+      src: '/images/notes/caretaker.jpg',
+      alt: {
+        ar: 'عاملان يتحدثان في ممر مستودع بينما يمر شخص ثالث خلفهما',
+        en: 'Two workers talking in a warehouse aisle as a third person walks past behind them',
+      },
       width: 1200,
       height: 700,
     },
@@ -119,8 +128,11 @@ export const fieldNotes: FieldNote[] = [
       ],
     },
     cover: {
-      src: 'https://picsum.photos/seed/miqyas-note-exclusions/1200/700',
-      alt: { ar: 'صفحة أولى من تقرير تقييم فني', en: 'The first page of a technical assessment report' },
+      src: '/images/notes/exclusions.jpg',
+      alt: {
+        ar: 'دفتر ملاحظات وقلم ولوح تدوين عليه أوراق فوق مكتب خشبي',
+        en: 'A notebook, pen, and clipboard of papers on a wooden desk',
+      },
       width: 1200,
       height: 700,
     },

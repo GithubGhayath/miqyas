@@ -14,8 +14,11 @@ export const conditionScale: ConditionGrade[] = [
       en: 'No intervention needed. Routine maintenance only.',
     },
     image: {
-      src: 'https://picsum.photos/seed/miqyas-grade-1/640/480',
-      alt: { ar: 'معدّة صناعية بحالة ممتازة', en: 'Industrial equipment in excellent condition' },
+      src: '/images/grades/grade-1-excellent.jpg',
+      alt: {
+        ar: 'صفوف نظيفة من مكابس صناعية في صالة إنتاج جيدة الإضاءة',
+        en: 'Clean rows of industrial press machines on a well-lit factory floor',
+      },
       width: 640,
       height: 480,
     },
@@ -33,8 +36,11 @@ export const conditionScale: ConditionGrade[] = [
       en: 'Monitor within the normal maintenance schedule.',
     },
     image: {
-      src: 'https://picsum.photos/seed/miqyas-grade-2/640/480',
-      alt: { ar: 'معدّة صناعية بحالة جيدة', en: 'Industrial equipment in good condition' },
+      src: '/images/grades/grade-2-good.jpg',
+      alt: {
+        ar: 'عامل يشغّل آلة لحام صناعية تظهر عليها آثار استخدام عادية',
+        en: 'A worker operating a welding machine showing normal wear from use',
+      },
       width: 640,
       height: 480,
     },
@@ -52,8 +58,11 @@ export const conditionScale: ConditionGrade[] = [
       en: 'A scheduled repair within 6–12 months is recommended.',
     },
     image: {
-      src: 'https://picsum.photos/seed/miqyas-grade-3/640/480',
-      alt: { ar: 'معدّة صناعية بحالة مقبولة', en: 'Industrial equipment in fair condition' },
+      src: '/images/grades/grade-3-fair.jpg',
+      alt: {
+        ar: 'آلة صناعية سليمة لكن متسخة، مع طبقة واضحة من الغبار والشحم على سطحها',
+        en: 'An intact but grimy industrial machine with a visible layer of dust and grease',
+      },
       width: 640,
       height: 480,
     },
@@ -71,8 +80,11 @@ export const conditionScale: ConditionGrade[] = [
       en: 'Repair or replace before returning to service.',
     },
     image: {
-      src: 'https://picsum.photos/seed/miqyas-grade-4/640/480',
-      alt: { ar: 'معدّة صناعية بحالة ضعيفة', en: 'Industrial equipment in poor condition' },
+      src: '/images/grades/grade-4-poor.jpg',
+      alt: {
+        ar: 'معدّات صناعية ثقيلة صدئة بشدة في موقع خارجي',
+        en: 'Heavily rusted heavy machinery at an outdoor site',
+      },
       width: 640,
       height: 480,
     },
@@ -90,8 +102,11 @@ export const conditionScale: ConditionGrade[] = [
       en: 'Take out of service immediately and replace.',
     },
     image: {
-      src: 'https://picsum.photos/seed/miqyas-grade-5/640/480',
-      alt: { ar: 'معدّة صناعية بحالة حرجة', en: 'Industrial equipment in critical condition' },
+      src: '/images/grades/grade-5-critical.jpg',
+      alt: {
+        ar: 'حفارة ثقيلة مهجورة داخل مبنى متهالك، وقد تآكلت بشدة من الصدأ',
+        en: 'An abandoned heavy excavator inside a derelict building, severely corroded by rust',
+      },
       width: 640,
       height: 480,
     },

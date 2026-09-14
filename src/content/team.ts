@@ -18,8 +18,11 @@ export const team: TeamMember[] = [
       en: 'Leads the field inspection and equipment condition grading.',
     },
     portrait: {
-      src: 'https://picsum.photos/seed/miqyas-team-1/480/480',
-      alt: { ar: 'صورة العضو M-01', en: 'Portrait of member M-01' },
+      src: '/images/team/team-1.jpg',
+      alt: {
+        ar: 'مهندس يفحص قاعة إنتاج صناعية مظلمة باستخدام جهاز لوحي',
+        en: 'An engineer inspecting a dark industrial hall using a tablet',
+      },
       width: 480,
       height: 480,
     },
@@ -33,8 +36,11 @@ export const team: TeamMember[] = [
       en: 'Handles CAD documentation and line layout drawings.',
     },
     portrait: {
-      src: 'https://picsum.photos/seed/miqyas-team-2/480/480',
-      alt: { ar: 'صورة العضو M-02', en: 'Portrait of member M-02' },
+      src: '/images/team/team-2.jpg',
+      alt: {
+        ar: 'عامل بخوذة بيضاء واقفًا بجانب معدّات صناعية خضراء',
+        en: 'A worker in a white hard hat standing beside green industrial machinery',
+      },
       width: 480,
       height: 480,
     },
@@ -48,8 +54,11 @@ export const team: TeamMember[] = [
       en: 'Reviews reports for methodology and consistency.',
     },
     portrait: {
-      src: 'https://picsum.photos/seed/miqyas-team-3/480/480',
-      alt: { ar: 'صورة العضو M-03', en: 'Portrait of member M-03' },
+      src: '/images/team/team-3.jpg',
+      alt: {
+        ar: 'مهندسة بخوذة أمان تعمل على حاسوب محمول في موقع إنشائي',
+        en: 'A woman engineer in a hard hat working on a laptop at a construction site',
+      },
       width: 480,
       height: 480,
     },
@@ -63,8 +72,11 @@ export const team: TeamMember[] = [
       en: 'Coordinates site visits and client communication.',
     },
     portrait: {
-      src: 'https://picsum.photos/seed/miqyas-team-4/480/480',
-      alt: { ar: 'صورة العضو M-04', en: 'Portrait of member M-04' },
+      src: '/images/team/team-4.jpg',
+      alt: {
+        ar: 'رجل بخوذة صفراء يحمل لوح تدوين في موقع إنشائي، ورافعة خلفه',
+        en: 'A man in a yellow hard hat holding a clipboard on site, a crane structure behind him',
+      },
       width: 480,
       height: 480,
     },
@@ -78,8 +90,11 @@ export const team: TeamMember[] = [
       en: 'Assesses electrical systems and power supply.',
     },
     portrait: {
-      src: 'https://picsum.photos/seed/miqyas-team-5/480/480',
-      alt: { ar: 'صورة العضو M-05', en: 'Portrait of member M-05' },
+      src: '/images/team/team-5.jpg',
+      alt: {
+        ar: 'مهندس كهرباء يفحص لوحة تحكم كهربائية مفتوحة',
+        en: 'An electrical engineer inspecting an open control panel',
+      },
       width: 480,
       height: 480,
     },
@@ -96,8 +111,11 @@ export const team: TeamMember[] = [
       en: "Built the reporting system and the firm's digital tools.",
     },
     portrait: {
-      src: 'https://picsum.photos/seed/miqyas-team-6/480/480',
-      alt: { ar: 'صورة العضو M-06', en: 'Portrait of member M-06' },
+      src: '/images/team/team-6.jpg',
+      alt: {
+        ar: 'رجل بسترة صفراء عاكسة يحمل خوذته في موقع صناعي مفتوح',
+        en: 'A man in a yellow safety vest holding his hard hat at an open industrial site',
+      },
       width: 480,
       height: 480,
     },

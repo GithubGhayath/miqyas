@@ -65,35 +65,50 @@ export const caseStudies: CaseStudy[] = [
       },
     ],
     cover: {
-      src: 'https://picsum.photos/seed/miqyas-case-canning-cover/1200/800',
-      alt: { ar: 'خط تعليب أغذية متوقف', en: 'Idle food-canning line' },
+      src: '/images/cases/canning-cover.jpg',
+      alt: {
+        ar: 'مقربة لخط تعليب نشط، عبوات معدنية تتحرك أسفل رؤوس التعبئة',
+        en: 'A close-up of an active canning line, cans moving beneath the filling heads',
+      },
       width: 1200,
       height: 800,
     },
     beforeAfter: {
       before: {
-        src: 'https://picsum.photos/seed/miqyas-case-canning-before/1200/800',
-        alt: { ar: 'الخط قبل التنظيف الميداني', en: 'The line before the site clean-up' },
+        src: '/images/cases/canning-before.jpg',
+        alt: {
+          ar: 'قاعة صناعية فارغة ومتوقفة عن العمل بجدران زرقاء متقشرة',
+          en: 'An empty, idle industrial hall with peeling blue-painted walls',
+        },
         width: 1200,
         height: 800,
       },
       after: {
-        src: 'https://picsum.photos/seed/miqyas-case-canning-after/1200/800',
-        alt: { ar: 'الخط بعد التنظيف الميداني', en: 'The line after the site clean-up' },
+        src: '/images/cases/clean-line-reference.jpg',
+        alt: {
+          ar: 'معدّات معالجة غذائية نظيفة من الفولاذ المقاوم للصدأ في منشأة مضاءة جيدًا',
+          en: 'Spotless stainless-steel food-processing equipment in a well-lit facility',
+        },
         width: 1200,
         height: 800,
       },
     },
     gallery: [
       {
-        src: 'https://picsum.photos/seed/miqyas-case-canning-1/900/600',
-        alt: { ar: 'لوحة بيانات الغلاية', en: 'Boiler nameplate' },
+        src: '/images/cases/canning-gallery-1.jpg',
+        alt: {
+          ar: 'شرر متطاير أثناء تشغيل آلة قص معدني على أرضية الورشة',
+          en: 'Sparks flying as a metal-cutting machine runs on the shop floor',
+        },
         width: 900,
         height: 600,
       },
       {
-        src: 'https://picsum.photos/seed/miqyas-case-canning-2/900/600',
-        alt: { ar: 'ناقل التعليب', en: 'The canning conveyor' },
+        src: '/images/cases/canning-gallery-2.jpg',
+        alt: {
+          ar: 'علب ألمنيوم مصطفة على ناقل قبل التعبئة',
+          en: 'Aluminium cans queued on a conveyor before filling',
+        },
         width: 900,
         height: 600,
       },
@@ -161,15 +176,21 @@ export const caseStudies: CaseStudy[] = [
       },
     ],
     cover: {
-      src: 'https://picsum.photos/seed/miqyas-case-foundry-cover/1200/800',
-      alt: { ar: 'مسبك معادن جزئي التضرر', en: 'Partially damaged metal foundry' },
+      src: '/images/cases/foundry-cover.jpg',
+      alt: {
+        ar: 'معدن منصهر يُصبّ في مسبك، والشرر يضيء الورشة',
+        en: 'Molten metal being poured in a foundry, sparks lighting up the shop',
+      },
       width: 1200,
       height: 800,
     },
     gallery: [
       {
-        src: 'https://picsum.photos/seed/miqyas-case-foundry-1/900/600',
-        alt: { ar: 'مسار الرافعة العلوية', en: 'The overhead crane runway' },
+        src: '/images/cases/foundry-gallery-1.jpg',
+        alt: {
+          ar: 'خطاف رافعة علوية بسعة طن واحد معلّق من عربته',
+          en: 'A one-tonne-rated overhead crane hook hanging from its trolley',
+        },
         width: 900,
         height: 600,
       },
@@ -226,15 +247,21 @@ export const caseStudies: CaseStudy[] = [
       },
     ],
     cover: {
-      src: 'https://picsum.photos/seed/miqyas-case-warehouse-cover/1200/800',
-      alt: { ar: 'مستودع ونظام مناولة مواد', en: 'Warehouse and material handling system' },
+      src: '/images/cases/warehouse-cover.jpg',
+      alt: {
+        ar: 'داخل مستودع صناعي مهجور وشاهق، بأرفف فارغة تحت سقف مرتفع',
+        en: 'The interior of a tall, abandoned industrial warehouse, empty racking under a high roof',
+      },
       width: 1200,
       height: 800,
     },
     gallery: [
       {
-        src: 'https://picsum.photos/seed/miqyas-case-warehouse-1/900/600',
-        alt: { ar: 'نظام الناقل الحزامي', en: 'The belt conveyor system' },
+        src: '/images/cases/warehouse-gallery-1.jpg',
+        alt: {
+          ar: 'صورة أرشيفية بالأبيض والأسود لهيكل ناقل في منشأة معالجة قديمة',
+          en: 'A black-and-white archival view of a conveyor structure at an old processing plant',
+        },
         width: 900,
         height: 600,
       },
