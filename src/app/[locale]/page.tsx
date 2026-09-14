@@ -46,13 +46,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   setRequestLocale(locale);
   const l = locale as Locale;
 
-  const [t, pins, services, caseStudies, fieldNotes, conditionScale] = await Promise.all([
+  const [t, pins, services, caseStudies, fieldNotes, conditionScale, site] = await Promise.all([
     getTranslations('home'),
     getSurveyPins(),
     getServices(),
     getCaseStudies(),
     getFieldNotes(),
     getConditionScale(),
+    getSite(),
   ]);
 
   const latestCase = caseStudies[0];
@@ -112,15 +113,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <>
                   <ReportFact
                     label={l === 'ar' ? 'خارج البلاد' : 'Outside the country'}
-                    value={<Measure value={l === 'ar' ? '٨' : '8'} unit={l === 'ar' ? 'ملايين سوري' : 'million Syrians'} />}
+                    value={<Measure value="8" unit={l === 'ar' ? 'ملايين سوري' : 'million Syrians'} />}
                   />
                   <ReportFact
                     label={l === 'ar' ? 'كلفة إعادة الإعمار المقدَّرة' : 'Estimated reconstruction cost'}
-                    value={<Measure value="216" unit={l === 'ar' ? 'مليار دولار' : 'billion USD'} />}
+                    value={
+                      <span className="flex flex-col gap-[2px]">
+                        <Measure value="216" unit={l === 'ar' ? 'مليار دولار' : 'billion USD'} />
+                        <span className="block font-sans text-[length:var(--step--2)] font-normal normal-case text-ink-3">
+                          {l === 'ar'
+                            ? 'البنك الدولي، 2025 — ضمن نطاق 140–345'
+                            : 'World Bank, 2025 — $140–345bn range'}
+                        </span>
+                      </span>
+                    }
                   />
                   <ReportFact
-                    label={l === 'ar' ? 'تغطية ميدانية دولية مستقرة' : 'Stable international field coverage'}
-                    value={<Measure value="0" />}
+                    label={l === 'ar' ? 'زمن الاستجابة المتوقع' : 'Expected response time'}
+                    value={<Measure value={site.responseTimeHours} unit={l === 'ar' ? 'ساعة' : 'hours'} />}
                   />
                 </>
               }
@@ -129,11 +139,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 paragraphs={
                   l === 'ar'
                     ? [
-                        'من يملك المال لا يستطيع الوصول إلى الأصل، ومن يستطيع الوصول إليه لا يستطيع تحويل ما يراه إلى ملف يفهمه ممول أو بنك. هذه الفجوة هي كل ما نعمل عليه.',
+                        'لا تغطية ميدانية مستقرة لشركات التقييم الدولية داخل سوريا. من يملك المال لا يستطيع الوصول إلى الأصل، ومن يستطيع الوصول إليه لا يستطيع تحويل ما يراه إلى ملف يفهمه ممول أو بنك. هذه الفجوة هي كل ما نعمل عليه.',
                         'قريبك يستطيع أن يصوّر لك المصنع. لا يستطيع أن يخبرك كم بقي من عمر المحرك، ولا أن يوقّع على رأي مستقل تعرضه على شريك.',
                       ]
                     : [
-                        'The person with the capital cannot reach the asset. The person who can reach it cannot turn what they see into something a lender will read. That gap is the whole of our work.',
+                        'No international assessment firm maintains a permanent field presence in Syria. The person with the capital cannot reach the asset. The person who can reach it cannot turn what they see into something a lender will read. That gap is the whole of our work.',
                         'A relative can send you photographs of the plant. They cannot tell you how much service life the drive motor has left, and they cannot sign an independent opinion you can put in front of a partner.',
                       ]
                 }
