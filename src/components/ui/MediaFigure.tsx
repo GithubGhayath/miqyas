@@ -2,6 +2,7 @@ import Image from 'next/image';
 import type { CSSProperties } from 'react';
 import type { ImageRef, Localized } from '@/content/types';
 import { useLocalized } from '@/hooks/useLocalized';
+import { withBasePath } from '@/lib/basePath';
 
 export function MediaFigure({
   image,
@@ -38,7 +39,7 @@ export function MediaFigure({
         }
       >
         <Image
-          src={image.src}
+          src={withBasePath(image.src)}
           alt={t(image.alt)}
           fill
           priority={priority}

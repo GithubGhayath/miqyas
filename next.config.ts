@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
   // src/proxy.ts and the new src/app/page.tsx that replaces its one job).
   output: 'export',
   basePath,
+  // `next/image` does NOT auto-prefix a local `src` with `basePath` (see
+  // node_modules/next/dist/docs/.../basePath.md, "Images" section) — that's
+  // only automatic for next/link and next/router. Every local image src is
+  // built with the `withBasePath()` helper (src/lib/basePath.ts) instead,
+  // which reads this inlined value. `env` (unlike a plain NEXT_PUBLIC_ var)
+  // is always baked into the client bundle regardless of prefix.
+  env: {
+    BASE_PATH: basePath,
+  },
   // GitHub Pages has no server-side rewrite step, so a route needs to be a
   // real directory with an index.html inside it (`/en/index.html`, reached
   // via the URL `/en/`) rather than a sibling `en.html` file.

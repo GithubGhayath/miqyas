@@ -7,6 +7,7 @@ import { AnimatePresence, m } from 'motion/react';
 import gsap from 'gsap';
 import type { Locale, TeamMember } from '@/content/types';
 import { pick } from '@/lib/pick';
+import { withBasePath } from '@/lib/basePath';
 import { useDirection } from '@/hooks/useDirection';
 import { respectsReducedMotion } from '@/lib/ignition';
 import { springSettled, springSnappy } from '@/lib/motion';
@@ -186,7 +187,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
           {nodes.map(({ member }) => (
             <li key={member.id} className="flex flex-col gap-[var(--spacing-2xs)] border border-border p-[var(--spacing-s)]">
               <div className="relative h-20 w-20 overflow-hidden rounded-full border border-border">
-                <Image src={member.portrait.src} alt="" fill priority sizes="80px" className="object-cover" />
+                <Image src={withBasePath(member.portrait.src)} alt="" fill priority sizes="80px" className="object-cover" />
               </div>
               <TitleBlock cells={[{ label: pick(member.role, locale), value: pick(member.name, locale) }]} />
               <p className="text-ink-2">{pick(member.contribution, locale)}</p>
@@ -238,7 +239,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                     expanded || previewed ? ' is-revealed' : ''
                   }`}
                 >
-                  <Image src={member.portrait.src} alt="" fill priority sizes="64px" className="object-cover" />
+                  <Image src={withBasePath(member.portrait.src)} alt="" fill priority sizes="64px" className="object-cover" />
                 </div>
                 <TitleBlock cells={[{ label: pick(member.role, locale), value: pick(member.name, locale) }]} />
               </button>
@@ -349,7 +350,7 @@ export function TeamAssembly({ team, locale }: { team: TeamMember[]; locale: Loc
                     }}
                   >
                     <Image
-                      src={member.portrait.src}
+                      src={withBasePath(member.portrait.src)}
                       alt=""
                       fill
                       priority

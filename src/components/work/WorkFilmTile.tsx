@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import type { CaseStudy, Locale } from '@/content/types';
 import { pick } from '@/lib/pick';
 import { useLocalized } from '@/hooks/useLocalized';
+import { withBasePath } from '@/lib/basePath';
 import { TitleBlock } from '@/components/ui/TitleBlock';
 import { TransitionLink } from '@/components/motion/TransitionLink';
 
@@ -60,7 +61,7 @@ export function WorkFilmTile({
       />
       <div className={`duotone duotone-fade film-tile__cover absolute inset-0${expanded || previewed ? ' is-revealed' : ''}`}>
         <Image
-          src={caseStudy.cover.src}
+          src={withBasePath(caseStudy.cover.src)}
           alt={t(caseStudy.cover.alt)}
           fill
           priority

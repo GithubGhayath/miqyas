@@ -6,6 +6,7 @@ import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent as
 import type { ImageRef } from '@/content/types';
 import { useDirection } from '@/hooks/useDirection';
 import { useLocalized } from '@/hooks/useLocalized';
+import { withBasePath } from '@/lib/basePath';
 
 export function BeforeAfter({ before, after }: { before: ImageRef; after: ImageRef }) {
   const { t } = useLocalized();
@@ -82,14 +83,14 @@ export function BeforeAfter({ before, after }: { before: ImageRef; after: ImageR
             exactly that structure, and there are only ever two of them per
             instance, so eager-loading is the correct, low-cost fix rather
             than chasing the browser's lazy-load heuristic further. */}
-        <Image src={before.src} alt={t(before.alt)} fill priority sizes="(min-width: 768px) 640px, 100vw" className="object-cover" />
+        <Image src={withBasePath(before.src)} alt={t(before.alt)} fill priority sizes="(min-width: 768px) 640px, 100vw" className="object-cover" />
         <div className="grain-local" aria-hidden="true" style={{ opacity: 0.05 }} />
         <span className="absolute bottom-[var(--spacing-2xs)] start-[var(--spacing-2xs)] bg-ink/70 px-[var(--spacing-2xs)] font-mono text-[length:var(--step--1)] text-void">
           {tBeforeAfter('before')}
         </span>
       </div>
       <div className="absolute inset-0" style={{ clipPath }}>
-        <Image src={after.src} alt={t(after.alt)} fill priority sizes="(min-width: 768px) 640px, 100vw" className="object-cover" />
+        <Image src={withBasePath(after.src)} alt={t(after.alt)} fill priority sizes="(min-width: 768px) 640px, 100vw" className="object-cover" />
         <span className="absolute bottom-[var(--spacing-2xs)] end-[var(--spacing-2xs)] bg-ink/70 px-[var(--spacing-2xs)] font-mono text-[length:var(--step--1)] text-void">
           {tBeforeAfter('after')}
         </span>

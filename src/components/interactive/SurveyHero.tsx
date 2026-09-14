@@ -9,6 +9,7 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import type { SurveyPin } from '@/content/types';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useDirection } from '@/hooks/useDirection';
+import { withBasePath } from '@/lib/basePath';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { GradeChip } from '@/components/ui/GradeChip';
 import { Measure } from '@/components/ui/Measure';
@@ -118,7 +119,7 @@ export function SurveyHero({ pins }: { pins: SurveyPin[] }) {
           transition={springSnappy}
         >
           <Image
-            src={HERO_IMAGE_SRC}
+            src={withBasePath(HERO_IMAGE_SRC)}
             alt={t(HERO_IMAGE_ALT)}
             fill
             priority
