@@ -14,11 +14,11 @@ export const caseStudies: CaseStudy[] = [
     status: 'pilot',
     brief: {
       ar: [
-        'مصنع تعليب أغذية متوقف عن العمل منذ ثماني سنوات. طلب المالك، المقيم خارج سوريا، رأيًا مستقلًا حول سبب التوقف الفعلي قبل التفكير في إعادة تشغيله.',
+        'مصنع تعليب أغذية متوقف عن العمل منذ عام 2012. طلب المالك، المقيم خارج سوريا، رأيًا مستقلًا حول سبب التوقف الفعلي قبل التفكير في إعادة تشغيله.',
         'هذا المشروع وثائقي وأُنجز دون مقابل، كأول عمل ميداني كامل للفريق.',
       ],
       en: [
-        'A food-canning plant idle for eight years. The owner, based outside Syria, asked for an independent opinion on the actual cause of the shutdown before considering a restart.',
+        'A food-canning plant idle since 2012. The owner, based outside Syria, asked for an independent opinion on the actual cause of the shutdown before considering a restart.',
         'This case was documented and delivered at no charge, as the team\'s first complete field assignment.',
       ],
     },

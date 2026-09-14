@@ -52,7 +52,7 @@ export default async function MethodPage({ params }: { params: Promise<{ locale:
         </div>
         <p className="mt-[var(--spacing-m)] measure-block text-ink-2">
           {l === 'ar'
-            ? 'ما نسلّمه اليوم هو العمود الأيسر من هذا الجدول: تقييم أولي مبني على مسح بصري منهجي. هذا ليس تنازلًا عن الدقة، بل هو الخطوة الصحيحة أولًا — رأي مستقل يمكّنك من اتخاذ قرار المضي قبل تحمّل كلفة فحص كامل ومُجهّز.'
+            ? 'ما نسلّمه اليوم هو العمود الأيمن من هذا الجدول: تقييم أولي مبني على مسح بصري منهجي. هذا ليس تنازلًا عن الدقة، بل هو الخطوة الصحيحة أولًا — رأي مستقل يمكّنك من اتخاذ قرار المضي قبل تحمّل كلفة فحص كامل ومُجهّز.'
             : 'What we deliver today is the left column of this table: a preliminary assessment built on a systematic visual survey. That is not a compromise on rigour — it is the right first step, an independent opinion that lets you decide whether to proceed before taking on the cost of a full, instrumented inspection.'}
         </p>
       </section>
