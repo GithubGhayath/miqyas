@@ -14,8 +14,8 @@ export const team: TeamMember[] = [
     name: { ar: 'M-01', en: 'M-01' },
     role: mechanicalRole,
     contribution: {
-      ar: 'يقود التقييم الميداني وتصنيف حالة المعدات.',
-      en: 'Leads the field assessment and equipment condition grading.',
+      ar: 'يقود الفحص الميداني وتصنيف حالة المعدات.',
+      en: 'Leads the field inspection and equipment condition grading.',
     },
     portrait: {
       src: 'https://picsum.photos/seed/miqyas-team-1/480/480',
@@ -29,8 +29,8 @@ export const team: TeamMember[] = [
     name: { ar: 'M-02', en: 'M-02' },
     role: mechanicalRole,
     contribution: {
-      ar: 'يتولى توثيق المخططات ورسومات التصميم بواسطة CAD.',
-      en: 'Handles CAD documentation and layout drawings.',
+      ar: 'يتولى التوثيق بالـ CAD ورسومات توزيع الخط.',
+      en: 'Handles CAD documentation and line layout drawings.',
     },
     portrait: {
       src: 'https://picsum.photos/seed/miqyas-team-2/480/480',
@@ -59,8 +59,8 @@ export const team: TeamMember[] = [
     name: { ar: 'M-04', en: 'M-04' },
     role: mechanicalRole,
     contribution: {
-      ar: 'ينسّق مع العملاء ويرتب مواعيد الزيارات الميدانية.',
-      en: 'Client site coordination and scheduling.',
+      ar: 'ينسّق الزيارات الميدانية والتواصل مع العميل.',
+      en: 'Coordinates site visits and client communication.',
     },
     portrait: {
       src: 'https://picsum.photos/seed/miqyas-team-4/480/480',
@@ -74,8 +74,8 @@ export const team: TeamMember[] = [
     name: { ar: 'M-05', en: 'M-05' },
     role: { ar: 'مهندس كهرباء', en: 'Electrical Engineer' },
     contribution: {
-      ar: 'يتولى تقييم الأنظمة الكهربائية ومصادر التغذية.',
-      en: 'Electrical systems and power-supply assessment.',
+      ar: 'يقيّم الأنظمة الكهربائية ومصادر الطاقة.',
+      en: 'Assesses electrical systems and power supply.',
     },
     portrait: {
       src: 'https://picsum.photos/seed/miqyas-team-5/480/480',
@@ -92,7 +92,7 @@ export const team: TeamMember[] = [
       en: 'Mechanical Design Engineer & Software, Founder',
     },
     contribution: {
-      ar: 'بنى نظام التقارير والأدوات الرقمية الخاصة بالشركة.',
+      ar: 'بنى نظام التقارير والأدوات الرقمية للفريق.',
       en: "Built the reporting system and the firm's digital tools.",
     },
     portrait: {
