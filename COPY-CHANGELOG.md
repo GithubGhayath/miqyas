@@ -58,3 +58,28 @@ and kept as-is, with the reasoning:
 
 No entries are listed below because none of the audited copy required a
 before/after change.
+
+## Second pass — Content Correctness, Typography, Imagery & Verification Pass (Task 1.11)
+
+Re-ran both checks (full manual read of `messages/ar.json` / `messages/en.json`
+and every `Localized`/`LocalizedRich` field in `src/content/*.ts`, plus the
+independent `grep -riE` hedge-vocabulary sweep) after this pass's Phase 1
+factual fixes and Phase 3 image work, since both added new copy that the
+first pass never saw:
+
+- The reworked homepage stats block (`src/app/[locale]/page.tsx`): the new
+  "Expected response time" fact, the World Bank attribution/range caption
+  under the $216bn figure, and the "No international assessment firm
+  maintains a permanent field presence in Syria" sentence (Tasks 1.3–1.5).
+- 25 new bilingual image `alt` strings written for the real photography
+  that replaced every `picsum.photos` placeholder (Task 3.2, see
+  [MEDIA-GUIDE.md](MEDIA-GUIDE.md)).
+
+The `grep` sweep still returns zero matches. The manual read found no rule
+violations in either the reworked stats block or the new alt text — the
+stats block states a sourced range and a measured figure rather than a bare
+claim, and the alt strings name the concrete subject of each photograph
+(hard hat colour, machine condition, specific action) rather than a generic
+label like "team photo" or "industrial equipment."
+
+**Zero further violations found. Zero strings changed in this pass.**
