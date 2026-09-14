@@ -81,8 +81,14 @@
 }
 
 :root {
-  --step--1: clamp(0.833rem, 0.8rem + 0.15vw, 0.9rem);
-  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  /* Task 2.2 (content/typography/imagery pass) — raised the *minimum* of
+     these two steps only (they're clamp()s, so lifting the floor fixes
+     small screens without inflating desktop past what --step-1 and up
+     already establish). --step--1 was the worst offender: 13.3px at its
+     smallest is metadata/caption text rendering below comfortable
+     reading size. --step-4 and up are untouched, per scope. */
+  --step--1: clamp(0.9375rem, 0.91rem + 0.14vw, 1rem);
+  --step-0: clamp(1.0625rem, 1.02rem + 0.22vw, 1.1875rem);
   --step-1: clamp(1.25rem, 1.18rem + 0.35vw, 1.5rem);
   --step-2: clamp(1.563rem, 1.44rem + 0.61vw, 2rem);
   --step-3: clamp(1.953rem, 1.75rem + 1.02vw, 2.667rem);
@@ -140,6 +146,13 @@ html[lang="en"] {
 }
 html[lang="ar"] body {
   line-height: 1.85;
+  /* Task 2.2.4 — Noto Kufi Arabic and IBM Plex Sans Arabic both render
+     optically smaller than their Latin counterparts at the same pixel
+     size for body copy; this closes that gap rather than assuming the
+     same --step-* number produces the same apparent size in both
+     scripts. Verify the two locales side by side after changing this,
+     not just by the numbers. */
+  font-size: 1.04em;
 }
 html[lang="en"] body {
   line-height: 1.6;
